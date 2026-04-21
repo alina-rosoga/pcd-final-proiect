@@ -1,0 +1,184 @@
+/**
+ * PCD T31 - Unix Domain Socket Server Variant
+ * 
+ * Provides a local IPC interface for the processing service,
+ * useful for co-located clients on the same machine.
+ * Mirrors the unixds pattern from the PCD lab skeleton.
+ * 
+ * Protocol: simple binary framing over a UNIX socket
+ *   [uint32_t msg_len][proc_request_t or proc_result_t payload]
+ * 
+ * The main SOAP-over-TCP server in server.c is the primary interface.
+ * This module is a secondary local interface / internal IPC channel.
+ */
+
+#include <stdio.h>
+/* pentru functii de intrare/iesire standard */
+#include <stdlib.h>
+/* pentru alocare de memorie si functii utilitare */
+#include <string.h>
+/* pentru manipularea sirurilor de caractere */
+#include <unistd.h>
+/* pentru functii POSIX de sistem */
+#include <errno.h>
+/* pentru gestionarea erorilor */
+#include <fcntl.h>
+/* pentru controlul descriptorilor de fisiere */
+#include <sys/types.h>
+/* pentru tipuri de date sistem */
+#include <sys/socket.h>
+/* pentru operatii cu socket-uri */
+#include <sys/un.h>
+#include <sys/wait.h>
+/* pentru asteptarea proceselor copil */
+
+#include "processing.h"
+/* pentru functii de procesare audio */
+#include "server.h"
+/* pentru definitii ale serverului */
+
+/* Constants                                                           */
+#define UNIX_SOCKET_PATH  "/tmp/pcd_t31.sock"
+#define UNIX_BACKLOG      8
+
+/* unix_recv_all: fiabil primeste over a flux socket               */
+static int unix_recv_all(int fd, void*buf, size_t len)
+{
+    char*ptr=(char *)buf;
+    size_t rem=len;
+    while (rem > 0) {
+        ssize_t n=read(fd, ptr, rem);
+        if (n < 0) {
+            if (errno==EINTR) continue;
+            return -1;
+        }
+        if (n==0) return -1; /* EOF - client disconnected */
+        ptr +=n;
+        rem -=(size_t)n;
+    }
+    return 0;
+}
+
+/* unix_send_all: fiabil trimite over a flux socket                  */
+static int unix_send_all(int fd, const void*buf, size_t len)
+{
+    const char*ptr=(const char *)buf;
+    size_t rem=len;
+    while (rem > 0) {
+        ssize_t n=write(fd, ptr, rem);
+        if (n < 0) {
+            if (errno==EINTR) continue;
+            return -1;
+        }
+        ptr +=n;
+        rem -=(size_t)n;
+    }
+    return 0;
+}
+
+/* handle_unix_client: proces one client conexiune                  */
+/* Called in a forked copil.                                          */
+static void handle_unix_client(int client_fd)
+{
+    /* primeste cerere lungime prefix */
+    uint32_t msg_len=0;
+    if (unix_recv_all(client_fd, &msg_len, sizeof(msg_len))!=0) {
+        perror("[unixds] recv msg_len");
+        return;
+    }
+
+    if (msg_len!=sizeof(proc_request_t)) {
+        fprintf(stderr, "[unixds] Unexpected msg_len %u (expected %zu)\n",
+                msg_len, sizeof(proc_request_t));
+        return;
+    }
+
+    /* primeste proc_request_t */
+    proc_request_t req;
+    if (unix_recv_all(client_fd, &req, sizeof(req))!=0) {
+        perror("[unixds] recv request");
+        return;
+    }
+
+    /* proces */
+    proc_result_t res;
+    memset(&res, 0, sizeof(res));
+    process_spectrogram(&req, &res);
+
+    /* trimite rezultat lungime prefix + rezultat */
+    uint32_t res_len=(uint32_t)sizeof(proc_result_t);
+    unix_send_all(client_fd, &res_len, sizeof(res_len));
+    unix_send_all(client_fd, &res,     sizeof(res));
+}
+
+/* run_unix_domain_server()                                           */
+
+/**
+ * @pe scurt Start a Unix Domain socket Server pentru local IPC.
+ *
+ * Accepts proc_request_t messages si responds with proc_result_t.
+ * Each client este handled in a forked copil proces.
+ *
+ * @return 0 on clean shutdown, -1 on setup eroare
+ */
+int run_unix_domain_server(void)
+{
+    /* Remove stale socket fisier */
+    unlink(UNIX_SOCKET_PATH);
+
+    int server_fd=socket(AF_UNIX, SOCK_STREAM, 0);
+    if (server_fd < 0) {
+        perror("[unixds] socket");
+        return -1;
+    }
+
+    struct sockaddr_un addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family=AF_UNIX;
+    strncpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+
+    if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr))!=0) {
+        perror("[unixds] bind");
+        close(server_fd);
+        return -1;
+    }
+
+    if (listen(server_fd, UNIX_BACKLOG)!=0) {
+        perror("[unixds] listen");
+        close(server_fd);
+        return -1;
+    }
+
+    fprintf(stdout, "[unixds] Listening on %s\n", UNIX_SOCKET_PATH);
+
+    for (;;) {
+        int client_fd=accept(server_fd, NULL, NULL);
+        if (client_fd < 0) {
+            if (errno==EINTR) continue;
+            perror("[unixds] accept");
+            break;
+        }
+
+        pid_t pid=fork();
+        if (pid < 0) {
+            perror("[unixds] fork");
+            close(client_fd);
+            continue;
+        }
+        if (pid==0) {
+            /* copil */
+            close(server_fd);
+            handle_unix_client(client_fd);
+            close(client_fd);
+            exit(EXIT_SUCCESS);
+        }
+        /* parinte */
+        close(client_fd);
+        while (waitpid(-1, NULL, WNOHANG) > 0)
+            ;
+    }
+
+    close(server_fd);
+    unlink(UNIX_SOCKET_PATH);
+    return 0;
+}

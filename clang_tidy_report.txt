@@ -1,0 +1,24 @@
+[1/7] Processing file /home/alina/pcd-t31/src/demo_milestone1.cpp.
+[2/7] Processing file /home/alina/pcd-t31/src/config_loader.c.
+1 error generated.
+Error while processing /home/alina/pcd-t31/src/config_loader.c.
+[3/7] Processing file /home/alina/pcd-t31/src/processing.cpp.
+1 error generated.
+Error while processing /home/alina/pcd-t31/src/processing.cpp.
+[4/7] Processing file /home/alina/pcd-t31/src/inetds2.c.
+2 errors generated.
+Error while processing /home/alina/pcd-t31/src/inetds2.c.
+[5/7] Processing file /home/alina/pcd-t31/src/inetsample2.c.
+3 errors generated.
+Error while processing /home/alina/pcd-t31/src/inetsample2.c.
+[6/7] Processing file /home/alina/pcd-t31/src/unixds.c.
+4 errors generated.
+Error while processing /home/alina/pcd-t31/src/unixds.c.
+[7/7] Processing file /home/alina/pcd-t31/src/threeds.c.
+6 errors generated.
+Error while processing /home/alina/pcd-t31/src/threeds.c.
+error: invalid argument '-std=c++14' not allowed with 'C' [clang-diagnostic-error]
+/usr/include/stdsoap2.h:751:11: error: 'new' file not found [clang-diagnostic-error]
+  751 | # include <new>
+      |           ^~~~~
+Found compiler error(s).

@@ -1,0 +1,2 @@
+[1/2] Processing file /home/alina/pcd-t31/src/demo_milestone1.cpp.
+[2/2] Processing file /home/alina/pcd-t31/src/processing.cpp.

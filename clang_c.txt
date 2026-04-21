@@ -1,0 +1,236 @@
+[1/4] Processing file /home/alina/pcd-t31/src/config_loader.c.
+5 warnings generated.
+[2/4] Processing file /home/alina/pcd-t31/src/inetds2.c.
+12 warnings generated.
+[3/4] Processing file /home/alina/pcd-t31/src/inetsample2.c.
+33 warnings generated.
+[4/4] Processing file /home/alina/pcd-t31/src/unixds.c.
+38 warnings generated.
+/home/alina/pcd-t31/src/config_loader.c:29:5: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   29 |     strncpy(out->output_dir,    "./output",                   MAX_PATH_LEN - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:29:5: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+   29 |     strncpy(out->output_dir,    "./output",                   MAX_PATH_LEN - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:30:5: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   30 |     strncpy(out->soap_endpoint, "http://localhost:8080/soap", MAX_PATH_LEN - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:30:5: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+   30 |     strncpy(out->soap_endpoint, "http://localhost:8080/soap", MAX_PATH_LEN - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:33:9: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   33 |         fprintf(stderr, "[config] Warning: %s:%d - %s  (using defaults)\n",
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:33:9: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   33 |         fprintf(stderr, "[config] Warning: %s:%d - %s  (using defaults)\n",
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:59:9: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   59 |         strncpy(out->output_dir, odir, MAX_PATH_LEN - 1);
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:59:9: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+   59 |         strncpy(out->output_dir, odir, MAX_PATH_LEN - 1);
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:64:9: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   64 |         strncpy(out->soap_endpoint, ep, MAX_PATH_LEN - 1);
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:64:9: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+   64 |         strncpy(out->soap_endpoint, ep, MAX_PATH_LEN - 1);
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:77:5: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   77 |     fprintf(stdout, "[inetds] Client connected: %s\n", client_ip);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:77:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   77 |     fprintf(stdout, "[inetds] Client connected: %s\n", client_ip);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:82:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   82 |         fprintf(stderr, "[inetds] Failed to read request length\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:82:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   82 |         fprintf(stderr, "[inetds] Failed to read request length\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:88:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   88 |         fprintf(stderr, "[inetds] Bad request size: %u (expected %zu)\n",
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:88:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   88 |         fprintf(stderr, "[inetds] Bad request size: %u (expected %zu)\n",
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:107:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  107 |     memset(&res, 0, sizeof(res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:107:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  107 |     memset(&res, 0, sizeof(res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:115:5: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  115 |     fprintf(stdout, "[inetds] Response sent: status=%d  msg=%s\n",
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:115:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  115 |     fprintf(stdout, "[inetds] Response sent: status=%d  msg=%s\n",
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:147:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  147 |     memset(&addr, 0, sizeof(addr));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:147:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  147 |     memset(&addr, 0, sizeof(addr));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:164:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  164 |     fprintf(stdout, "[inetds] Raw TCP server on port %d\n", port);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:164:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  164 |     fprintf(stdout, "[inetds] Raw TCP server on port %d\n", port);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:72:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   72 |     memset(&hints, 0, sizeof(hints));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:72:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+   72 |     memset(&hints, 0, sizeof(hints));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:77:5: warning: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   77 |     snprintf(port_str, sizeof(port_str), "%d", port);
+      |     ^~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:77:5: note: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11
+   77 |     snprintf(port_str, sizeof(port_str), "%d", port);
+      |     ^~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:107:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  107 |         fprintf(stderr, "[raw_client] Failed to read response length\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:107:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  107 |         fprintf(stderr, "[raw_client] Failed to read response length\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:114:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  114 |         fprintf(stderr, "[raw_client] Bad response size: %u\n", res_len);
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:114:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  114 |         fprintf(stderr, "[raw_client] Bad response size: %u\n", res_len);
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:119:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  119 |     memset(res, 0, sizeof(*res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:119:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  119 |     memset(res, 0, sizeof(*res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:130:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  130 |     fprintf(stdout, "\n--- proc_result_t ---\n");
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:130:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  130 |     fprintf(stdout, "\n--- proc_result_t ---\n");
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:131:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  131 |     fprintf(stdout, "  status     : %d\n",    res->status);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:131:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  131 |     fprintf(stdout, "  status     : %d\n",    res->status);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:132:5: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  132 |     fprintf(stdout, "  error_msg  : %s\n",    res->error_msg);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:132:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  132 |     fprintf(stdout, "  error_msg  : %s\n",    res->error_msg);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:133:5: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  133 |     fprintf(stdout, "  output     : %s\n",    res->output_path);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:133:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  133 |     fprintf(stdout, "  output     : %s\n",    res->output_path);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:134:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  134 |     fprintf(stdout, "  sample_rate: %d Hz\n", res->sample_rate);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:134:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  134 |     fprintf(stdout, "  sample_rate: %d Hz\n", res->sample_rate);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:135:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  135 |     fprintf(stdout, "  n_samples  : %d\n",    res->n_samples);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:135:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  135 |     fprintf(stdout, "  n_samples  : %d\n",    res->n_samples);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:136:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  136 |     fprintf(stdout, "  duration   : %.2f s\n",res->duration_s);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:136:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  136 |     fprintf(stdout, "  duration   : %.2f s\n",res->duration_s);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:137:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  137 |     fprintf(stdout, "  n_mels     : %d\n",    res->n_mels);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:137:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  137 |     fprintf(stdout, "  n_mels     : %d\n",    res->n_mels);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:138:5: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  138 |     fprintf(stdout, "  n_frames   : %d\n",    res->n_frames);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:138:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  138 |     fprintf(stdout, "  n_frames   : %d\n",    res->n_frames);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:167:13: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  167 |             fprintf(stderr,
+      |             ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:167:13: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  167 |             fprintf(stderr,
+      |             ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:176:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  176 |         fprintf(stderr, "[inetsample2] Error: -f <file> required\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:176:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  176 |         fprintf(stderr, "[inetsample2] Error: -f <file> required\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:180:5: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  180 |     fprintf(stdout, "[inetsample2] Connecting to %s:%d\n", host, port);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:180:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  180 |     fprintf(stdout, "[inetsample2] Connecting to %s:%d\n", host, port);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:183:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  183 |     memset(&req, 0, sizeof(req));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:183:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  183 |     memset(&req, 0, sizeof(req));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:184:5: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  184 |     strncpy(req.input_path, file_path, MAX_PATH_LEN - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:184:5: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+  184 |     strncpy(req.input_path, file_path, MAX_PATH_LEN - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:187:5: warning: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  187 |     snprintf(req.output_path, MAX_PATH_LEN, "./output/raw_%d.bin", (int)getpid());
+      |     ^~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:187:5: note: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11
+  187 |     snprintf(req.output_path, MAX_PATH_LEN, "./output/raw_%d.bin", (int)getpid());
+      |     ^~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:196:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  196 |         fprintf(stderr, "[inetsample2] Call failed\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:196:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  196 |         fprintf(stderr, "[inetsample2] Call failed\n");
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:89:9: warning: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   89 |         fprintf(stderr, "[unixds] Unexpected msg_len %u (expected %zu)\n",
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:89:9: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   89 |         fprintf(stderr, "[unixds] Unexpected msg_len %u (expected %zu)\n",
+      |         ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:103:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  103 |     memset(&res, 0, sizeof(res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:103:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  103 |     memset(&res, 0, sizeof(res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:136:5: warning: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  136 |     memset(&addr, 0, sizeof(addr));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:136:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  136 |     memset(&addr, 0, sizeof(addr));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:138:5: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  138 |     strncpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:138:5: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+  138 |     strncpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:152:5: warning: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  152 |     fprintf(stdout, "[unixds] Listening on %s\n", UNIX_SOCKET_PATH);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:152:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  152 |     fprintf(stdout, "[unixds] Listening on %s\n", UNIX_SOCKET_PATH);
+      |     ^~~~~~~
