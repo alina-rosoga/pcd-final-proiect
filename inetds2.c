@@ -21,58 +21,54 @@
 /* pentru functii POSIX de sistem */
 #include <errno.h>
 /* pentru gestionarea erorilor */
-#include <signal.h>
-/* pentru gestionarea semnalelor */
 #include <netinet/in.h>
 /* pentru socket-uri internet */
 #include <arpa/inet.h>
 /* pentru conversii adrese IP */
-#include <sys/types.h>
-/* pentru tipuri de date sistem */
 #include <sys/socket.h>
 /* pentru operatii cu socket-uri */
 #include <sys/wait.h>
 /* pentru asteptarea proceselor copil */
+#include <stdint.h>
+/* pentru uint32_t si uint16_t */
 
 #include "processing.h"
 /* pentru functii de procesare audio */
-#include "server.h"
-/* pentru definitii ale serverului */
 
 /* Constants                                                           */
 #define INET_RAW_PORT    9090   /**< brut TCP port (separate from soap) */
 #define INET_BACKLOG     16
 
 /* read_all / write_all: fiabil flux I/O via POSIX syscalls        */
-static ssize_t read_all(int fd, void*buf, size_t len)
+static ssize_t read_all(int sock_fd, void*buf, size_t len)
 {
     char*ptr=(char *)buf;
     size_t  rem=len;
     while (rem > 0) {
-        ssize_t n=read(fd, ptr, rem);
-        if (n < 0) {
-            if (errno==EINTR) continue;
+        ssize_t num_bytes=read(sock_fd, ptr, rem);
+        if (num_bytes < 0) {
+            if (errno==EINTR) { continue; }
             return -1;
         }
-        if (n==0) return (ssize_t)(len - rem); /* EOF */
-        ptr +=n;
-        rem -=(size_t)n;
+        if (num_bytes==0) { return (ssize_t)(len - rem); } /* EOF */
+        ptr +=num_bytes;
+        rem -=(size_t)num_bytes;
     }
     return (ssize_t)len;
 }
 
-static ssize_t write_all(int fd, const void*buf, size_t len)
+static ssize_t write_all(int sock_fd, const void*buf, size_t len)
 {
     const char*ptr=(const char *)buf;
     size_t rem=len;
     while (rem > 0) {
-        ssize_t n=write(fd, ptr, rem);
-        if (n < 0) {
-            if (errno==EINTR) continue;
+        ssize_t num_bytes=write(sock_fd, ptr, rem);
+        if (num_bytes < 0) {
+            if (errno==EINTR) { continue; }
             return -1;
         }
-        ptr +=n;
-        rem -=(size_t)n;
+        ptr +=num_bytes;
+        rem -=(size_t)num_bytes;
     }
     return (ssize_t)len;
 }
@@ -80,45 +76,45 @@ static ssize_t write_all(int fd, const void*buf, size_t len)
 /* handle_inet_client                                                  */
 static void handle_inet_client(int client_fd, const char*client_ip)
 {
-    fprintf(stdout, "[inetds] Client connected: %s\n", client_ip);
+    (void)fprintf(stdout, "[inetds] Client connected: %s\n", client_ip);
 
     /* citeste lungime-prefixat cerere */
     uint32_t req_len=0;
     if (read_all(client_fd, &req_len, sizeof(req_len))!=sizeof(req_len)) {
-        fprintf(stderr, "[inetds] Failed to read request length\n");
+        (void)fprintf(stderr, "[inetds] Failed to read request length\n");
         return;
     }
     req_len=ntohl(req_len); /* retea byte ordine → gazda */
 
     if (req_len!=sizeof(proc_request_t)) {
-        fprintf(stderr, "[inetds] Bad request size: %u (expected %zu)\n",
+        (void)fprintf(stderr, "[inetds] Bad request size: %u (expected %zu)\n",
                 req_len, sizeof(proc_request_t));
         return;
     }
 
     proc_request_t req;
     if (read_all(client_fd, &req, sizeof(req))!=sizeof(req)) {
-        perror("[inetds] read request");
+        (void)perror("[inetds] read request");
         return;
     }
 
     /* aplica implicit pentru unset fields */
-    if (req.target_sr<=0) req.target_sr=DEFAULT_SR;
-    if (req.n_fft<=0) req.n_fft=DEFAULT_N_FFT;
-    if (req.hop_length<=0) req.hop_length=DEFAULT_HOP_LENGTH;
-    if (req.n_mels<=0) req.n_mels=DEFAULT_N_MELS;
+    if (req.target_sr<=0) { req.target_sr=DEFAULT_SR; }
+    if (req.n_fft<=0) { req.n_fft=DEFAULT_N_FFT; }
+    if (req.hop_length<=0) { req.hop_length=DEFAULT_HOP_LENGTH; }
+    if (req.n_mels<=0) { req.n_mels=DEFAULT_N_MELS; }
 
     /* proces (fork intern) */
     proc_result_t res;
-    memset(&res, 0, sizeof(res));
-    process_spectrogram(&req, &res);
+    (void)memset(&res, 0, sizeof(res));
+    (void)process_spectrogram(&req, &res);
 
     /* trimite lungime-prefixat raspuns */
     uint32_t res_len_net=htonl((uint32_t)sizeof(proc_result_t));
-    write_all(client_fd, &res_len_net, sizeof(res_len_net));
-    write_all(client_fd, &res, sizeof(res));
+    (void)write_all(client_fd, &res_len_net, sizeof(res_len_net));
+    (void)write_all(client_fd, &res, sizeof(res));
 
-    fprintf(stdout, "[inetds] Response sent: status=%d  msg=%s\n",
+    (void)fprintf(stdout, "[inetds] Response sent: status=%d  msg=%s\n",
             res.status, res.error_msg);
 }
 
@@ -135,37 +131,37 @@ static void handle_inet_client(int client_fd, const char*client_ip)
  */
 int run_inet_raw_server(int port)
 {
-    if (port<=0) port=INET_RAW_PORT;
+    if (port<=0) { port=INET_RAW_PORT; }
 
     int server_fd=socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
-        perror("[inetds] socket");
+        (void)perror("[inetds] socket");
         return -1;
     }
 
     /* Allow reuse de port immediately after Server restarts */
     int opt=1;
-    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    (void)setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
+    (void)memset(&addr, 0, sizeof(addr));
     addr.sin_family=AF_INET;
     addr.sin_addr.s_addr=INADDR_ANY;
     addr.sin_port=htons((uint16_t)port);
 
     if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr))!=0) {
-        perror("[inetds] bind");
-        close(server_fd);
+        (void)perror("[inetds] bind");
+        (void)close(server_fd);
         return -1;
     }
 
     if (listen(server_fd, INET_BACKLOG)!=0) {
-        perror("[inetds] listen");
-        close(server_fd);
+        (void)perror("[inetds] listen");
+        (void)close(server_fd);
         return -1;
     }
 
-    fprintf(stdout, "[inetds] Raw TCP server on port %d\n", port);
+    (void)fprintf(stdout, "[inetds] Raw TCP server on port %d\n", port);
 
     for (;;) {
         struct sockaddr_in client_addr;
@@ -175,34 +171,35 @@ int run_inet_raw_server(int port)
                                (struct sockaddr *)&client_addr,
                                &addr_len);
         if (client_fd < 0) {
-            if (errno==EINTR) continue;
-            perror("[inetds] accept");
+            if (errno==EINTR) { continue; }
+            (void)perror("[inetds] accept");
             break;
         }
 
         char client_ip[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &client_addr.sin_addr,
+        (void)inet_ntop(AF_INET, &client_addr.sin_addr,
                   client_ip, sizeof(client_ip));
 
         pid_t pid=fork();
         if (pid < 0) {
-            perror("[inetds] fork");
-            close(client_fd);
+            (void)perror("[inetds] fork");
+            (void)close(client_fd);
             continue;
         }
         if (pid==0) {
             /* copil */
-            close(server_fd);
+            (void)close(server_fd);
             handle_inet_client(client_fd, client_ip);
-            close(client_fd);
+            (void)close(client_fd);
             exit(EXIT_SUCCESS);
         }
         /* parinte */
-        close(client_fd);
-        while (waitpid(-1, NULL, WNOHANG) > 0)
+        (void)close(client_fd);
+        while (waitpid(-1, NULL, WNOHANG) > 0) {
             ;
+        }
     }
 
-    close(server_fd);
+    (void)close(server_fd);
     return 0;
 }

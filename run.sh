@@ -7,11 +7,11 @@ fi
 INPUT="$1"
 WAV="output/input_converted.wav"
 
-echo "=== Conversie audio ==="
+echo " Conversie audio "
 ffmpeg -i "$INPUT" -ac 1 -ar 22050 -sample_fmt s16 "$WAV" -y 2>/dev/null
 echo "Convertit: $WAV"
 
-echo "=== Compilare ==="
+echo "Compilare"
 g++ -std=c++14 -D_POSIX_C_SOURCE=200809L \
     -Iinclude -Isrc -I$HOME/.local/include -I/usr/include/eigen3 \
     -o demo_milestone1 \
@@ -19,10 +19,10 @@ g++ -std=c++14 -D_POSIX_C_SOURCE=200809L \
     -x c src/config_loader.c -x none \
     -lconfig -lm 2>&1 | grep error || true
 
-echo "=== Rulare demo ==="
+echo "Rulare demo"
 ./demo_milestone1 -c config/server.cfg -f "$WAV"
 
-echo "=== Generare spectrograma ==="
+echo "Generare spectrograma"
 python3 << 'PYEOF'
 import numpy as np
 import matplotlib.pyplot as plt
@@ -51,4 +51,4 @@ print("Salvat: ./output/spectrogram.png")
 PYEOF
 
 echo ""
-echo "=== GATA! Deschide output/spectrogram.png ==="
+echo " GATA! Deschide output/spectrogram.png "

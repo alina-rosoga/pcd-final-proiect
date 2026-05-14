@@ -18,11 +18,8 @@
 /* pentru manipularea sirurilor de caractere */
 #include <unistd.h>
 /* pentru functii POSIX de sistem */
-#include <errno.h>
-/* pentru gestionarea erorilor */
-#include <getopt.h>
-#include <arpa/inet.h>
-/* pentru conversii adrese IP */
+#include <stdint.h>
+/* pentru uint32_t si uint16_t */
 #include <netinet/in.h>
 /* pentru socket-uri internet */
 #include <sys/socket.h>
@@ -33,34 +30,41 @@
 /* pentru functii de procesare audio */
 #include "sclient.h"
 /* pentru clientul soap */
-#include "server.h"
-/* pentru definitii ale serverului */
 
 /* mediu variabila keys                                           */
 #define ENV_RAW_SERVER "PCD_RAW_SERVER"
 #define ENV_RAW_PORT   "PCD_RAW_PORT"
+#define PORT_STR_LEN   8
+#define STRTOL_BASE    10
+#define DEFAULT_RAW_PORT 9090
 
 /* read_all / write_all helpers (POSIX syscalls only)                 */
-static ssize_t read_all(int fd, void*buf, size_t len)
+static ssize_t read_all(int sock_fd, void*buf, size_t len)
 {
     char*ptr=(char *)buf;
     size_t rem=len;
     while (rem > 0) {
-        ssize_t n=read(fd, ptr, rem);
-        if (n<=0) return (ssize_t)(len - rem);
-        ptr +=n; rem -=(size_t)n;
+        ssize_t num_bytes=read(sock_fd, ptr, rem);
+        if (num_bytes<=0) {
+            return (ssize_t)(len - rem);
+        }
+        ptr +=num_bytes;
+        rem -=(size_t)num_bytes;
     }
     return (ssize_t)len;
 }
 
-static ssize_t write_all(int fd, const void*buf, size_t len)
+static ssize_t write_all(int sock_fd, const void*buf, size_t len)
 {
     const char*ptr=(const char *)buf;
     size_t rem=len;
     while (rem > 0) {
-        ssize_t n=write(fd, ptr, rem);
-        if (n < 0) return -1;
-        ptr +=n; rem -=(size_t)n;
+        ssize_t num_bytes=write(sock_fd, ptr, rem);
+        if (num_bytes < 0) {
+            return -1;
+        }
+        ptr +=num_bytes;
+        rem -=(size_t)num_bytes;
     }
     return (ssize_t)len;
 }
@@ -72,127 +76,148 @@ int raw_client_call(const char*host,
                     proc_result_t*res)
 {
     /* Resolve gazda */
-    struct addrinfo hints, *ai;
+    struct addrinfo hints;
+    struct addrinfo *addr_info;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family=AF_INET;
     hints.ai_socktype=SOCK_STREAM;
 
-    char port_str[8];
+    char port_str[PORT_STR_LEN];
     snprintf(port_str, sizeof(port_str), "%d", port);
 
-    if (getaddrinfo(host, port_str, &hints, &ai)!=0) {
+    if (getaddrinfo(host, port_str, &hints, &addr_info)!=0) {
         perror("[raw_client] getaddrinfo");
         return -1;
     }
 
-    int fd=socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (fd < 0) {
+    int sock_fd=socket(addr_info->ai_family, addr_info->ai_socktype, addr_info->ai_protocol);
+    if (sock_fd < 0) {
         perror("[raw_client] socket");
-        freeaddrinfo(ai);
+        freeaddrinfo(addr_info);
         return -1;
     }
 
-    if (connect(fd, ai->ai_addr, ai->ai_addrlen)!=0) {
+    if (connect(sock_fd, addr_info->ai_addr, addr_info->ai_addrlen)!=0) {
         perror("[raw_client] connect");
-        close(fd);
-        freeaddrinfo(ai);
+        close(sock_fd);
+        freeaddrinfo(addr_info);
         return -1;
     }
-    freeaddrinfo(ai);
+    freeaddrinfo(addr_info);
 
     /* trimite lungime-prefixat cerere */
     uint32_t len_net=htonl((uint32_t)sizeof(proc_request_t));
-    write_all(fd, &len_net, sizeof(len_net));
-    write_all(fd, req, sizeof(*req));
+    (void)write_all(sock_fd, &len_net, sizeof(len_net));
+    (void)write_all(sock_fd, req, sizeof(*req));
 
     /* primeste lungime-prefixat raspuns */
     uint32_t res_len_net=0;
-    if (read_all(fd, &res_len_net, sizeof(res_len_net))!=sizeof(res_len_net)) {
-        fprintf(stderr, "[raw_client] Failed to read response length\n");
-        close(fd);
+    if (read_all(sock_fd, &res_len_net, sizeof(res_len_net))!=sizeof(res_len_net)) {
+        (void)fprintf(stderr, "[raw_client] Failed to read response length\n");
+        close(sock_fd);
         return -1;
     }
     uint32_t res_len=ntohl(res_len_net);
 
     if (res_len!=sizeof(proc_result_t)) {
-        fprintf(stderr, "[raw_client] Bad response size: %u\n", res_len);
-        close(fd);
+        (void)fprintf(stderr, "[raw_client] Bad response size: %u\n", res_len);
+        close(sock_fd);
         return -1;
     }
 
-    memset(res, 0, sizeof(*res));
-    read_all(fd, res, sizeof(*res));
-    close(fd);
+    (void)memset(res, 0, sizeof(*res));
+    (void)read_all(sock_fd, res, sizeof(*res));
+    close(sock_fd);
     return 0;
 }
 
 /* print_proc_result - public API (declared in sclient.h)            */
 void print_proc_result(const proc_result_t*res)
 {
-    fprintf(stdout, "\n--- proc_result_t ---\n");
-    fprintf(stdout, "  status     : %d\n",    res->status);
-    fprintf(stdout, "  error_msg  : %s\n",    res->error_msg);
-    fprintf(stdout, "  output     : %s\n",    res->output_path);
-    fprintf(stdout, "  sample_rate: %d Hz\n", res->sample_rate);
-    fprintf(stdout, "  n_samples  : %d\n",    res->n_samples);
-    fprintf(stdout, "  duration   : %.2f s\n",res->duration_s);
-    fprintf(stdout, "  n_mels     : %d\n",    res->n_mels);
-    fprintf(stdout, "  n_frames   : %d\n",    res->n_frames);
+    (void)fprintf(stdout, "\n--- proc_result_t ---\n");
+    (void)fprintf(stdout, "  status     : %d\n",    res->status);
+    (void)fprintf(stdout, "  error_msg  : %s\n",    res->error_msg);
+    (void)fprintf(stdout, "  output     : %s\n",    res->output_path);
+    (void)fprintf(stdout, "  sample_rate: %d Hz\n", res->sample_rate);
+    (void)fprintf(stdout, "  n_samples  : %d\n",    res->n_samples);
+    (void)fprintf(stdout, "  duration   : %.2f s\n",res->duration_s);
+    (void)fprintf(stdout, "  n_mels     : %d\n",    res->n_mels);
+    (void)fprintf(stdout, "  n_frames   : %d\n",    res->n_frames);
 }
-
-/* principal()                                                              */
 int main(int argc, char*argv[])
 {
     /* implicit from env vars (fallback la hardcoded) */
     const char*host=getenv(ENV_RAW_SERVER);
-    if (!host) host="127.0.0.1";
+    if (!host) {
+        host="127.0.0.1";
+    }
 
     const char*port_env=getenv(ENV_RAW_PORT);
-    int port=port_env ? atoi(port_env) : 9090;
+    int port=port_env ? (int)strtol(port_env, NULL, STRTOL_BASE) : DEFAULT_RAW_PORT;
 
     const char*file_path=NULL;
     int n_mels=DEFAULT_N_MELS;
-    int sr=DEFAULT_SR;
+    int sample_rate=DEFAULT_SR;
 
     /* CLI args suprascrie env vars */
     int opt;
     while ((opt=getopt(argc, argv, "h:p:f:m:r:?"))!=-1) {
         switch (opt) {
-        case 'h': host=optarg;       break;
-        case 'p': port=atoi(optarg); break;
-        case 'f': file_path=optarg;       break;
-        case 'm': n_mels=atoi(optarg); break;
-        case 'r': sr=atoi(optarg); break;
-        default:
-            fprintf(stderr,
-                "Usage: %s -h host -p port -f file [-m mels] [-r samplerate]\n"
-                "Env: %s, %s\n",
-                argv[0], ENV_RAW_SERVER, ENV_RAW_PORT);
-            return 1;
+        case 'h': {
+            host=optarg;
+            break;
+        }
+        case 'p': {
+            char *endptr;
+            port=(int)strtol(optarg, &endptr, STRTOL_BASE);
+            break;
+        }
+        case 'f': {
+            file_path=optarg;
+            break;
+        }
+        case 'm': {
+            char *endptr;
+            n_mels=(int)strtol(optarg, &endptr, STRTOL_BASE);
+            break;
+        }
+        case 'r': {
+            char *endptr;
+            sample_rate=(int)strtol(optarg, &endptr, STRTOL_BASE);
+            break;
+        }
+        case '?': {
+            break;
+        }
+        default: {
+            break;
+        }
         }
     }
 
     if (!file_path) {
-        fprintf(stderr, "[inetsample2] Error: -f <file> required\n");
+        (void)fprintf(stderr, "[inetsample2] Error: -f <file> required\n");
         return 1;
     }
 
-    fprintf(stdout, "[inetsample2] Connecting to %s:%d\n", host, port);
+    (void)fprintf(stdout, "[inetsample2] Connecting to %s:%d\n", host, port);
 
     proc_request_t req;
-    memset(&req, 0, sizeof(req));
-    strncpy(req.input_path, file_path, MAX_PATH_LEN - 1);
+    (void)memset(&req, 0, sizeof(req));
+    (void)memcpy(req.input_path, file_path, strlen(file_path));
+    req.input_path[MAX_PATH_LEN - 1]='\0';
 
     /* construieste iesire cale on Server side (Server fills acest in) */
-    snprintf(req.output_path, MAX_PATH_LEN, "./output/raw_%d.bin", (int)getpid());
+    (void)snprintf(req.output_path, MAX_PATH_LEN, "./output/raw_%d.bin", (int)getpid());
 
-    req.target_sr=sr;
+    req.target_sr=sample_rate;
     req.n_mels=n_mels;
     req.n_fft=DEFAULT_N_FFT;
     req.hop_length=DEFAULT_HOP_LENGTH;
 
     proc_result_t res;
     if (raw_client_call(host, port, &req, &res)!=0) {
+        (void)raw_client_call(host, port, &req, &res)!=0) {
         fprintf(stderr, "[inetsample2] Call failed\n");
         return 1;
     }

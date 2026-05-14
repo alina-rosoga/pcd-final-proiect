@@ -11,8 +11,6 @@
 
 #include <stdio.h>
 /* pentru functii de intrare/iesire standard */
-#include <stdlib.h>
-/* pentru alocare de memorie si functii utilitare */
 #include <string.h>
 /* pentru manipularea sirurilor de caractere */
 #include <unistd.h>
@@ -40,7 +38,7 @@ static void build_output_path(char*buf, size_t bufsz,
 {
     /* Use PID + a counter pentru unique iesire filenames */
     static int counter=0;
-    snprintf(buf, bufsz, "%s/%s_%d_%d.bin",
+    (void)snprintf(buf, bufsz, "%s/%s_%d_%d.bin",
              outdir, basename_hint, (int)getpid(), counter++);
 }
 
@@ -57,9 +55,10 @@ int ns__analyzeAudio(struct soap*soap,
 
     /* construieste cerere pentru procesare module */
     proc_request_t preq;
-    memset(&preq, 0, sizeof(preq));
+    (void)memset(&preq, 0, sizeof(preq));
 
-    strncpy(preq.input_path, req->inputFilePath, MAX_PATH_LEN - 1);
+    (void)memcpy(preq.input_path, req->inputFilePath, MAX_PATH_LEN - 1);
+    preq.input_path[MAX_PATH_LEN - 1]='\0';
 
     build_output_path(preq.output_path, MAX_PATH_LEN,
                       g_cfg.output_dir, "spec");
@@ -72,14 +71,14 @@ int ns__analyzeAudio(struct soap*soap,
 
     /* Delegate la fork()ed worker */
     proc_result_t pres;
-    memset(&pres, 0, sizeof(pres));
+    (void)memset(&pres, 0, sizeof(pres));
 
-    int rc=process_spectrogram(&preq, &pres);
+    int ret_code=process_spectrogram(&preq, &pres);
 
-    res->statusCode=(rc==0) ? 0 : -1;
+    res->statusCode=(ret_code==0) ? 0 : -1;
     res->statusMessage=soap_strdup(soap, pres.error_msg);
 
-    if (rc==0) {
+    if (ret_code==0) {
         res->resultFilePath=soap_strdup(soap, pres.output_path);
         res->sampleRate=pres.sample_rate;
         res->durationSeconds=pres.duration_s;

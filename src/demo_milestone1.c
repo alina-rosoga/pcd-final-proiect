@@ -41,6 +41,8 @@
 #include "processing.h"
 /* pentru functii de procesare audio */
 
+#define DIR_PERMISSIONS 0755
+
 /* print_env_info: demonstrate getenv utilizare                           */
 static void print_env_info(void)
 {
@@ -49,11 +51,11 @@ static void print_env_info(void)
     const char*pcd_env=getenv("PCD_SERVER");
     const char*path_env=getenv("PATH");
 
-    fprintf(stdout, "\n--- Environment Variables ---\n");
-    fprintf(stdout, "  HOME       = %s\n", home     ? home     : "(not set)");
-    fprintf(stdout, "  USER       = %s\n", user     ? user     : "(not set)");
-    fprintf(stdout, "  PCD_SERVER = %s\n", pcd_env  ? pcd_env  : "(not set)");
-    fprintf(stdout, "  PATH       = %.60s...\n", path_env ? path_env : "(not set)");
+    (void)fprintf(stdout, "\n--- Environment Variables ---\n");
+    (void)fprintf(stdout, "  HOME       = %s\n", home     ? home     : "(not set)");
+    (void)fprintf(stdout, "  USER       = %s\n", user     ? user     : "(not set)");
+    (void)fprintf(stdout, "  PCD_SERVER = %s\n", pcd_env  ? pcd_env  : "(not set)");
+    (void)fprintf(stdout, "  PATH       = %.60s...\n", path_env ? path_env : "(not set)");
 }
 
 /* librosa_demo_worker: runs inside fork()ed copil                    */
@@ -62,9 +64,9 @@ static void librosa_demo_worker(const char*audio_path,
                                 int         pipefd_write)
 {
     proc_result_t res;
-    memset(&res, 0, sizeof(res));
+    (void)memset(&res, 0, sizeof(res));
 
-    fprintf(stdout, "[child %d] Loading audio: %s\n", (int)getpid(), audio_path);
+    (void)fprintf(stdout, "[child %d] Loading audio: %s\n", (int)getpid(), audio_path);
 
     /* LibrosaC: incarca audio */
     float*samples=NULL;
@@ -79,7 +81,7 @@ static void librosa_demo_worker(const char*audio_path,
         goto send_result;
     }
 
-    fprintf(stdout, "[child %d] Loaded %d samples @ %d Hz (%.2f s)\n",
+    (void)fprintf(stdout, "[child %d] Loaded %d samples @ %d Hz (%.2f s)\n",
             (int)getpid(), n_samples, sr, (double)n_samples/sr);
 
     /* LibrosaC: Mel spectrograma */
@@ -99,7 +101,7 @@ static void librosa_demo_worker(const char*audio_path,
         goto send_result;
     }
 
-    fprintf(stdout, "[child %d] Mel spectrogram: %d bands x %d frames\n",
+    (void)fprintf(stdout, "[child %d] Mel spectrogram: %d bands x %d frames\n",
             (int)getpid(), n_mels, n_frames);
 
     /* LibrosaC: convert la dB */
@@ -147,10 +149,12 @@ static void librosa_demo_worker(const char*audio_path,
     res.n_mels=n_mels;
     res.n_frames=n_frames;
     res.sample_rate=sr;
-    strncpy(res.output_path, output_path, MAX_PATH_LEN - 1);
-    strncpy(res.error_msg,   "OK",        sizeof(res.error_msg) - 1);
+    (void)memcpy(res.output_path, output_path, MAX_PATH_LEN - 1);
+    res.output_path[MAX_PATH_LEN - 1]='\0';
+    (void)memcpy(res.error_msg, "OK", strlen("OK"));
+    res.error_msg[strlen("OK")]='\0';
 
-    fprintf(stdout, "[child %d] Written: %s\n", (int)getpid(), output_path);
+    (void)fprintf(stdout, "[child %d] Written: %s\n", (int)getpid(), output_path);
 
 send_result:
     /* trimite proc_result_t la parinte via pipe */
@@ -180,7 +184,7 @@ int main(int argc, char*argv[])
         case 'c': cfg_path=optarg; break;
         case 'f': audio_path=optarg; break;
         case 'h':
-            fprintf(stdout,
+            (void)fprintf(stdout,
                 "Usage: %s -c config.cfg -f audio.wav\n", argv[0]);
             return 0;
         default: return 1;
@@ -188,7 +192,7 @@ int main(int argc, char*argv[])
     }
 
     if (!audio_path) {
-        fprintf(stderr, "Error: -f <audio.wav> required\n");
+        (void)fprintf(stderr, "Error: -f <audio.wav> required\n");
         return 1;
     }
 
@@ -196,17 +200,17 @@ int main(int argc, char*argv[])
     server_config_t cfg;
     config_load(cfg_path, &cfg);
 
-    fprintf(stdout, "=== PCD T31 - Milestone 1 Demo ===\n");
-    fprintf(stdout, "Config: port=%d  output_dir=%s  log_level=%d\n",
+    (void)fprintf(stdout, "PCD T31 - Milestone 1 Demo \n");
+    (void)fprintf(stdout, "Config: port=%d  output_dir=%s  log_level=%d\n",
             cfg.port, cfg.output_dir, cfg.log_level);
 
     /* Afiseaza mediu variabile */
     print_env_info();
-
-    /* Create iesire director daca needed */
-    mkdir(cfg.output_dir, 0755);
+(void)mkdir(cfg.output_dir, DIR_PERMISSIONS);
 
     /* construieste iesire cale */
+    char output_path[MAX_PATH_LEN];
+    (void)/* construieste iesire cale */
     char output_path[MAX_PATH_LEN];
     snprintf(output_path, sizeof(output_path),
              "%s/demo_%d.bin", cfg.output_dir, (int)getpid());
@@ -216,7 +220,7 @@ int main(int argc, char*argv[])
     if (pipe(pipefd)!=0) { perror("pipe"); return 1; }
 
     /* fork worker */
-    fprintf(stdout, "\n[parent %d] Forking worker...\n", (int)getpid());
+    (void)fprintf(stdout, "\n[parent %d] Forking worker...\n", (int)getpid());
     pid_t pid=fork();
 
     if (pid < 0) {
@@ -251,14 +255,14 @@ int main(int argc, char*argv[])
     waitpid(pid, &wstatus, 0);
 
     /* afiseaza summary */
-    fprintf(stdout, "\n--- Result (from child via pipe) ---\n");
-    fprintf(stdout, "  Status      : %d (%s)\n", res.status, res.error_msg);
+    (void)fprintf(stdout, "\n--- Result (from child via pipe) ---\n");
+    (void)fprintf(stdout, "  Status      : %d (%s)\n", res.status, res.error_msg);
     if (res.status==0) {
-        fprintf(stdout, "  Output file : %s\n", res.output_path);
-        fprintf(stdout, "  Sample rate : %d Hz\n", res.sample_rate);
-        fprintf(stdout, "  Mel bands   : %d\n",    res.n_mels);
-        fprintf(stdout, "  Time frames : %d\n",    res.n_frames);
-        fprintf(stdout, "  Duration    : %.2f s\n", res.duration_s);
+        (void)fprintf(stdout, "  Output file : %s\n", res.output_path);
+        (void)fprintf(stdout, "  Sample rate : %d Hz\n", res.sample_rate);
+        (void)fprintf(stdout, "  Mel bands   : %d\n",    res.n_mels);
+        (void)fprintf(stdout, "  Time frames : %d\n",    res.n_frames);
+        (void)fprintf(stdout, "  Duration    : %.2f s\n", res.duration_s);
     }
 
     config_free(&cfg);

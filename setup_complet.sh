@@ -10,17 +10,11 @@ ok()   { echo -e "${GREEN}[OK]${NC}    $*"; }
 info() { echo -e "${YELLOW}[INFO]${NC}  $*"; }
 err()  { echo -e "${RED}[ERR]${NC}   $*"; exit 1; }
 
-# =============================================================================
-# PASUL 1 — Structura de directoare
-# =============================================================================
 info "Creez structura de directoare..."
 mkdir -p include src config output
 
 ok "Directoare create: include/ src/ config/ output/"
 
-# =============================================================================
-# PASUL 2 — Header-ele care lipseau (server.h, processing.h, config_loader.h)
-# =============================================================================
 info "Creez include/server.h ..."
 cat > include/server.h << 'EOF'
 /**

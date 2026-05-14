@@ -22,56 +22,56 @@
 /* pentru functii POSIX de sistem */
 #include <errno.h>
 /* pentru gestionarea erorilor */
-#include <fcntl.h>
-/* pentru controlul descriptorilor de fisiere */
-#include <sys/types.h>
-/* pentru tipuri de date sistem */
 #include <sys/socket.h>
 /* pentru operatii cu socket-uri */
 #include <sys/un.h>
 #include <sys/wait.h>
 /* pentru asteptarea proceselor copil */
+#include <stdint.h>
+/* pentru uint32_t */
 
 #include "processing.h"
 /* pentru functii de procesare audio */
-#include "server.h"
-/* pentru definitii ale serverului */
 
 /* Constants                                                           */
 #define UNIX_SOCKET_PATH  "/tmp/pcd_t31.sock"
 #define UNIX_BACKLOG      8
+#define LOG_BUFSIZE       512
+
+#define SAFE_MEMSET(dst, val, sz) (void)memset((dst), (val), (sz))
+#define SAFE_MEMCPY(dst, src, sz) (void)memcpy((dst), (src), (sz))
 
 /* unix_recv_all: fiabil primeste over a flux socket               */
-static int unix_recv_all(int fd, void*buf, size_t len)
+static int unix_recv_all(int sock_fd, void*buf, size_t len)
 {
     char*ptr=(char *)buf;
     size_t rem=len;
     while (rem > 0) {
-        ssize_t n=read(fd, ptr, rem);
-        if (n < 0) {
-            if (errno==EINTR) continue;
+        ssize_t num_bytes=read(sock_fd, ptr, rem);
+        if (num_bytes < 0) {
+            if (errno==EINTR) { continue; }
             return -1;
         }
-        if (n==0) return -1; /* EOF - client disconnected */
-        ptr +=n;
-        rem -=(size_t)n;
+        if (num_bytes==0) { return -1; } /* EOF - client disconnected */
+        ptr +=num_bytes;
+        rem -=(size_t)num_bytes;
     }
     return 0;
 }
 
 /* unix_send_all: fiabil trimite over a flux socket                  */
-static int unix_send_all(int fd, const void*buf, size_t len)
+static int unix_send_all(int sock_fd, const void*buf, size_t len)
 {
     const char*ptr=(const char *)buf;
     size_t rem=len;
     while (rem > 0) {
-        ssize_t n=write(fd, ptr, rem);
-        if (n < 0) {
-            if (errno==EINTR) continue;
+        ssize_t num_bytes=write(sock_fd, ptr, rem);
+        if (num_bytes < 0) {
+            if (errno==EINTR) { continue; }
             return -1;
         }
-        ptr +=n;
-        rem -=(size_t)n;
+        ptr +=num_bytes;
+        rem -=(size_t)num_bytes;
     }
     return 0;
 }
@@ -88,8 +88,10 @@ static void handle_unix_client(int client_fd)
     }
 
     if (msg_len!=sizeof(proc_request_t)) {
-        fprintf(stderr, "[unixds] Unexpected msg_len %u (expected %zu)\n",
+        char buf[LOG_BUFSIZE];
+        (void)snprintf(buf, sizeof(buf), "[unixds] Unexpected msg_len %u (expected %zu)\n",
                 msg_len, sizeof(proc_request_t));
+        fputs(buf, stderr);
         return;
     }
 
@@ -102,13 +104,13 @@ static void handle_unix_client(int client_fd)
 
     /* proces */
     proc_result_t res;
-    memset(&res, 0, sizeof(res));
-    process_spectrogram(&req, &res);
+    (void)memset(&res, 0, sizeof(res));
+    (void)process_spectrogram(&req, &res);
 
     /* trimite rezultat lungime prefix + rezultat */
     uint32_t res_len=(uint32_t)sizeof(proc_result_t);
-    unix_send_all(client_fd, &res_len, sizeof(res_len));
-    unix_send_all(client_fd, &res,     sizeof(res));
+    (void)unix_send_all(client_fd, &res_len, sizeof(res_len));
+    (void)unix_send_all(client_fd, &res,     sizeof(res));
 }
 
 /* run_unix_domain_server()                                           */
@@ -124,37 +126,40 @@ static void handle_unix_client(int client_fd)
 int run_unix_domain_server(void)
 {
     /* Remove stale socket fisier */
-    unlink(UNIX_SOCKET_PATH);
+    (void)unlink(UNIX_SOCKET_PATH);
 
     int server_fd=socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_fd < 0) {
-        perror("[unixds] socket");
+        (void)perror("[unixds] socket");
         return -1;
     }
 
     struct sockaddr_un addr;
-    memset(&addr, 0, sizeof(addr));
+    (void)memset(&addr, 0, sizeof(addr));
     addr.sun_family=AF_UNIX;
-    strncpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+    (void)memcpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+    addr.sun_path[sizeof(addr.sun_path) - 1]='\0';
 
     if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr))!=0) {
         perror("[unixds] bind");
-        close(server_fd);
+        (void)close(server_fd);
         return -1;
     }
 
     if (listen(server_fd, UNIX_BACKLOG)!=0) {
         perror("[unixds] listen");
-        close(server_fd);
+        (void)close(server_fd);
         return -1;
     }
 
-    fprintf(stdout, "[unixds] Listening on %s\n", UNIX_SOCKET_PATH);
+    fputs("[unixds] Listening on ", stdout);
+    fputs(UNIX_SOCKET_PATH, stdout);
+    fputs("\n", stdout);
 
     for (;;) {
         int client_fd=accept(server_fd, NULL, NULL);
         if (client_fd < 0) {
-            if (errno==EINTR) continue;
+            if (errno==EINTR) { continue; }
             perror("[unixds] accept");
             break;
         }
@@ -162,23 +167,24 @@ int run_unix_domain_server(void)
         pid_t pid=fork();
         if (pid < 0) {
             perror("[unixds] fork");
-            close(client_fd);
+            (void)close(client_fd);
             continue;
         }
         if (pid==0) {
             /* copil */
-            close(server_fd);
+            (void)close(server_fd);
             handle_unix_client(client_fd);
-            close(client_fd);
-            exit(EXIT_SUCCESS);
+            (void)close(client_fd);
+            _exit(EXIT_SUCCESS);
         }
         /* parinte */
-        close(client_fd);
-        while (waitpid(-1, NULL, WNOHANG) > 0)
+        (void)close(client_fd);
+        while (waitpid(-1, NULL, WNOHANG) > 0) {
             ;
+        }
     }
 
-    close(server_fd);
-    unlink(UNIX_SOCKET_PATH);
+    (void)close(server_fd);
+    (void)unlink(UNIX_SOCKET_PATH);
     return 0;
 }

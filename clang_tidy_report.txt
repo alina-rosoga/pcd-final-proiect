@@ -1,24 +1,859 @@
-[1/7] Processing file /home/alina/pcd-t31/src/demo_milestone1.cpp.
-[2/7] Processing file /home/alina/pcd-t31/src/config_loader.c.
-1 error generated.
+[1/9] Processing file /home/alina/pcd-t31/src/server.c.
+7898 warnings and 1 error generated.
+Error while processing /home/alina/pcd-t31/src/server.c.
+[2/9] Processing file /home/alina/pcd-t31/src/config_loader.c.
+9731 warnings and 1 error generated.
 Error while processing /home/alina/pcd-t31/src/config_loader.c.
-[3/7] Processing file /home/alina/pcd-t31/src/processing.cpp.
-1 error generated.
-Error while processing /home/alina/pcd-t31/src/processing.cpp.
-[4/7] Processing file /home/alina/pcd-t31/src/inetds2.c.
-2 errors generated.
+[3/9] Processing file /home/alina/pcd-t31/src/soapds.c.
+17175 warnings and 1 error generated.
+Error while processing /home/alina/pcd-t31/src/soapds.c.
+[4/9] Processing file /home/alina/pcd-t31/src/client.c.
+24631 warnings and 1 error generated.
+Error while processing /home/alina/pcd-t31/src/client.c.
+[5/9] Processing file /home/alina/pcd-t31/src/inetds2.c.
+30411 warnings and 1 error generated.
 Error while processing /home/alina/pcd-t31/src/inetds2.c.
-[5/7] Processing file /home/alina/pcd-t31/src/inetsample2.c.
-3 errors generated.
+[6/9] Processing file /home/alina/pcd-t31/src/inetsample2.c.
+36039 warnings and 4 errors generated.
 Error while processing /home/alina/pcd-t31/src/inetsample2.c.
-[6/7] Processing file /home/alina/pcd-t31/src/unixds.c.
-4 errors generated.
-Error while processing /home/alina/pcd-t31/src/unixds.c.
-[7/7] Processing file /home/alina/pcd-t31/src/threeds.c.
-6 errors generated.
+[7/9] Processing file /home/alina/pcd-t31/src/threeds.c.
+44247 warnings and 4 errors generated.
 Error while processing /home/alina/pcd-t31/src/threeds.c.
-error: invalid argument '-std=c++14' not allowed with 'C' [clang-diagnostic-error]
-/usr/include/stdsoap2.h:751:11: error: 'new' file not found [clang-diagnostic-error]
-  751 | # include <new>
-      |           ^~~~~
-Found compiler error(s).
+[8/9] Processing file /home/alina/pcd-t31/src/unixds.c.
+50082 warnings and 4 errors generated.
+Error while processing /home/alina/pcd-t31/src/unixds.c.
+[9/9] Processing file /home/alina/pcd-t31/src/demo_milestone1.c.
+55823 warnings and 5 errors generated.
+Error while processing /home/alina/pcd-t31/src/demo_milestone1.c.
+/home/alina/pcd-t31/src/client.c:23:1: error: included header getopt.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   23 | #include <getopt.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   24 | 
+/home/alina/pcd-t31/src/client.c:38:11: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   38 |     (void)fprintf(stderr,
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/client.c:38:11: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   38 |     (void)fprintf(stderr,
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/client.c:55:27: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+   55 |     const char*env_server=getenv(ENV_SERVER_KEY);
+      |                           ^
+/home/alina/pcd-t31/src/client.c:59:16: error: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   59 |     int n_mels=128;
+      |                ^
+/home/alina/pcd-t31/src/client.c:60:21: error: 22050 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   60 |     int sample_rate=22050;
+      |                     ^
+/home/alina/pcd-t31/src/client.c:64:17: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+   64 |     while ((opt=getopt(argc, argv, "s:f:m:r:h"))!=-1) {
+      |                 ^
+/home/alina/pcd-t31/src/client.c:64:17: error: no header providing "getopt" is directly included [misc-include-cleaner,-warnings-as-errors]
+   17 |     while ((opt=getopt(argc, argv, "s:f:m:r:h"))!=-1) {
+      |                 ^
+/home/alina/pcd-t31/src/client.c:66:28: error: no header providing "optarg" is directly included [misc-include-cleaner,-warnings-as-errors]
+   66 |         case 's': endpoint=optarg;       break;
+      |                            ^
+/home/alina/pcd-t31/src/client.c:68:26: error: 'atoi' used to convert a string to an integer value, but function will not report conversion errors; consider using 'strtol' instead [cert-err34-c,-warnings-as-errors]
+   68 |         case 'm': n_mels=atoi(optarg); break;
+      |                          ^
+/home/alina/pcd-t31/src/client.c:69:31: error: 'atoi' used to convert a string to an integer value, but function will not report conversion errors; consider using 'strtol' instead [cert-err34-c,-warnings-as-errors]
+   69 |         case 'r': sample_rate=atoi(optarg); break;
+      |                               ^
+/home/alina/pcd-t31/src/client.c:76:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   76 |         (void)fprintf(stderr, "[client] Error: -f <file> is required\n\n");
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:76:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   76 |         (void)fprintf(stderr, "[client] Error: -f <file> is required\n\n");
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:81:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   81 |     fprintf(stdout, "[client] Connecting to: %s\n", endpoint);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/client.c:81:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/client.c:81:5: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   81 |     fprintf(stdout, "[client] Connecting to: %s\n", endpoint);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:81:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   81 |     fprintf(stdout, "[client] Connecting to: %s\n", endpoint);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:82:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   82 |     fprintf(stdout, "[client] File         : %s\n", file_path);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/client.c:82:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/client.c:82:5: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   82 |     fprintf(stdout, "[client] File         : %s\n", file_path);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:82:5: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   82 |     fprintf(stdout, "[client] File         : %s\n", file_path);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:83:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   83 |     fprintf(stdout, "[client] Mel bands    : %d\n", n_mels);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/client.c:83:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/client.c:83:5: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   83 |     fprintf(stdout, "[client] Mel bands    : %d\n", n_mels);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:83:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   83 |     fprintf(stdout, "[client] Mel bands    : %d\n", n_mels);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:84:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   84 |     fprintf(stdout, "[client] Sample rate  : %d Hz\n", sample_rate);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/client.c:84:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/client.c:84:5: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   84 |     fprintf(stdout, "[client] Sample rate  : %d Hz\n", sample_rate);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:84:5: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   84 |     fprintf(stdout, "[client] Sample rate  : %d Hz\n", sample_rate);
+      |     ^~~~~~~
+/home/alina/pcd-t31/src/client.c:94:5: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   94 |     memset(&req, 0, sizeof(req));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/client.c:94:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+   94 |     memset(&req, 0, sizeof(req));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/client.c:95:5: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   95 |     memset(&res, 0, sizeof(res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/client.c:95:5: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+   95 |     memset(&res, 0, sizeof(res));
+      |     ^~~~~~
+/home/alina/pcd-t31/src/client.c:100:14: error: 2048 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+  100 |     req.nFft=2048;
+      |              ^
+/home/alina/pcd-t31/src/client.c:101:19: error: 512 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+  101 |     req.hopLength=512;
+      |                   ^
+/home/alina/pcd-t31/src/client.c:104:9: error: variable name 'rc' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  104 |     int rc=soap_call_ns__analyzeAudio(&soap, endpoint, NULL, &req, &res);
+      |         ^
+/home/alina/pcd-t31/src/client.c:114:11: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  114 |     (void)fprintf(stdout, "\n[client] === Server Response ===\n");
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/client.c:114:11: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  114 |     (void)fprintf(stdout, "\n[client] === Server Response ===\n");
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/client.c:115:11: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  115 |     (void)fprintf(stdout, "[client] Status     : %d (%s)\n",
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/client.c:115:11: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  115 |     (void)fprintf(stdout, "[client] Status     : %d (%s)\n",
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/client.c:119:15: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  119 |         (void)fprintf(stdout, "[client] Result file: %s\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:119:15: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  119 |         (void)fprintf(stdout, "[client] Result file: %s\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:121:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  121 |         (void)fprintf(stdout, "[client] Sample rate: %d Hz\n",  res.sampleRate);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:121:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  121 |         (void)fprintf(stdout, "[client] Sample rate: %d Hz\n",  res.sampleRate);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:122:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  122 |         (void)fprintf(stdout, "[client] Duration   : %.2f s\n", res.durationSeconds);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:122:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  122 |         (void)fprintf(stdout, "[client] Duration   : %.2f s\n", res.durationSeconds);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:123:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  123 |         (void)fprintf(stdout, "[client] Mel bands  : %d\n",     res.nMels);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:123:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  123 |         (void)fprintf(stdout, "[client] Mel bands  : %d\n",     res.nMels);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:124:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  124 |         (void)fprintf(stdout, "[client] Time frames: %d\n",     res.nFrames);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/client.c:124:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  124 |         (void)fprintf(stdout, "[client] Time frames: %d\n",     res.nFrames);
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:26:11: error: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   26 |     (void)memcpy(out->output_dir, "./output", strlen("./output"));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:26:11: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+   26 |     (void)memcpy(out->output_dir, "./output", strlen("./output"));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:28:11: error: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   28 |     (void)memcpy(out->soap_endpoint, "http://localhost:8080/soap", strlen("http://localhost:8080/soap"));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:28:11: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+   28 |     (void)memcpy(out->soap_endpoint, "http://localhost:8080/soap", strlen("http://localhost:8080/soap"));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:32:15: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   32 |         (void)fprintf(stderr, "[config] Warning: %s:%d - %s  (using defaults)\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:32:15: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   32 |         (void)fprintf(stderr, "[config] Warning: %s:%d - %s  (using defaults)\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/config_loader.c:61:15: error: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   61 |         (void)memcpy(out->output_dir, odir, MAX_PATH_LEN - 1);
+      |               ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:61:15: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+   61 |         (void)memcpy(out->output_dir, odir, MAX_PATH_LEN - 1);
+      |               ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:66:16: error: variable name 'ep' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   66 |     const char*ep;
+      |                ^
+/home/alina/pcd-t31/src/config_loader.c:68:15: error: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   68 |         (void)memcpy(out->soap_endpoint, ep, MAX_PATH_LEN - 1);
+      |               ^~~~~~
+/home/alina/pcd-t31/src/config_loader.c:68:15: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+   68 |         (void)memcpy(out->soap_endpoint, ep, MAX_PATH_LEN - 1);
+      |               ^~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:31:1: error: included header types.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   31 | #include <sys/types.h> /* System types */
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   32 | #include <sys/wait.h> /* Process waiting */
+/home/alina/pcd-t31/src/demo_milestone1.c:33:1: error: included header getopt.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   33 | #include <getopt.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   34 | 
+/home/alina/pcd-t31/src/demo_milestone1.c:35:1: error: included header libconfig.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   35 | #include <libconfig.h>
+      | ^~~~~~~~~~~~~~~~~~~~~~
+   36 | #include <librosa/librosa.h>
+/home/alina/pcd-t31/src/demo_milestone1.c:36:10: error: 'librosa/librosa.h' file not found [clang-diagnostic-error]
+   36 | #include <librosa/librosa.h>
+      |          ^~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:49:21: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+   49 |     const char*home=getenv("HOME");
+      |                     ^
+/home/alina/pcd-t31/src/demo_milestone1.c:50:21: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+   50 |     const char*user=getenv("USER");
+      |                     ^
+/home/alina/pcd-t31/src/demo_milestone1.c:51:24: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+   51 |     const char*pcd_env=getenv("PCD_SERVER");
+      |                        ^
+/home/alina/pcd-t31/src/demo_milestone1.c:52:25: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+   52 |     const char*path_env=getenv("PATH");
+      |                         ^
+/home/alina/pcd-t31/src/demo_milestone1.c:62:33: error: 2 adjacent parameters of 'librosa_demo_worker' of similar type ('const char *') are easily swapped by mistake [bugprone-easily-swappable-parameters,-warnings-as-errors]
+   62 | static void librosa_demo_worker(const char*audio_path,
+      |                                 ^~~~~~~~~~~~~~~~~~~~~~
+   63 |                                 const char*output_path,
+      |                                 ~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:62:44: note: the first parameter in the range is 'audio_path'
+   62 | static void librosa_demo_worker(const char*audio_path,
+      |                                            ^~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:63:44: note: the last parameter in the range is 'output_path'
+   63 |                                 const char*output_path,
+      |                                            ^~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:74:12: error: variable name 'sr' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   74 |     int    sr=0;
+      |            ^
+/home/alina/pcd-t31/src/demo_milestone1.c:76:9: error: variable name 'rc' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   76 |     int rc=librosa_load(audio_path, 22050, 1, &samples, &n_samples, &sr);
+      |         ^
+/home/alina/pcd-t31/src/demo_milestone1.c:76:37: error: 22050 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   76 |     int rc=librosa_load(audio_path, 22050, 1, &samples, &n_samples, &sr);
+      |                                     ^
+/home/alina/pcd-t31/src/demo_milestone1.c:78:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   78 |         snprintf(res.error_msg, sizeof(res.error_msg),
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   79 |                  "librosa_load failed (rc=%d)", rc);
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:78:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:84:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   84 |     fprintf(stdout, "[child %d] Loaded %d samples @ %d Hz (%.2f s)\n",
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   85 |             (int)getpid(), n_samples, sr, (double)n_samples/sr);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:84:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:93:33: error: 2048 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   93 |                                 2048, 512, 128,
+      |                                 ^
+/home/alina/pcd-t31/src/demo_milestone1.c:93:39: error: 512 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   93 |                                 2048, 512, 128,
+      |                                       ^
+/home/alina/pcd-t31/src/demo_milestone1.c:93:44: error: 128 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   93 |                                 2048, 512, 128,
+      |                                            ^
+/home/alina/pcd-t31/src/demo_milestone1.c:98:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   98 |         snprintf(res.error_msg, sizeof(res.error_msg),
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   99 |                  "librosa_melspectrogram failed (rc=%d)", rc);
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:98:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:104:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  104 |     fprintf(stdout, "[child %d] Mel spectrogram: %d bands x %d frames\n",
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  105 |             (int)getpid(), n_mels, n_frames);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:104:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:113:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  113 |         snprintf(res.error_msg, sizeof(res.error_msg),
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  114 |                  "librosa_amplitude_to_db failed (rc=%d)", rc);
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:113:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:120:9: error: variable name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  120 |     int fd=open(output_path,
+      |         ^
+/home/alina/pcd-t31/src/demo_milestone1.c:125:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  125 |         snprintf(res.error_msg, sizeof(res.error_msg),
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  126 |                  "open(%s) failed: %s", output_path, strerror(errno));
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:125:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:126:54: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  126 |                  "open(%s) failed: %s", output_path, strerror(errno));
+      |                                                      ^
+/home/alina/pcd-t31/src/demo_milestone1.c:133:5: error: no header providing "int32_t" is directly included [misc-include-cleaner,-warnings-as-errors]
+   24 |     int32_t hdr[2]={ (int32_t)n_mels, (int32_t)n_frames };
+      |     ^
+/home/alina/pcd-t31/src/demo_milestone1.c:140:17: error: variable name 'w' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  140 |         ssize_t w=write(fd, ptr, total);
+      |                 ^
+/home/alina/pcd-t31/src/demo_milestone1.c:162:20: error: variable name 'p' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  162 |         const char*p=(const char *)&res;
+      |                    ^
+/home/alina/pcd-t31/src/demo_milestone1.c:165:21: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  165 |             ssize_t n=write(pipefd_write, p, rem);
+      |                     ^
+/home/alina/pcd-t31/src/demo_milestone1.c:166:23: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+  166 |             if (n < 0) break;
+      |                       ^      
+      |                        {
+/home/alina/pcd-t31/src/demo_milestone1.c:182:17: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  182 |     while ((opt=getopt(argc, argv, "c:f:h"))!=-1) {
+      |                 ^
+/home/alina/pcd-t31/src/demo_milestone1.c:184:28: error: no header providing "optarg" is directly included [misc-include-cleaner,-warnings-as-errors]
+   24 |         case 'c': cfg_path=optarg; break;
+      |                            ^
+/home/alina/pcd-t31/src/demo_milestone1.c:187:13: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  187 |             fprintf(stdout,
+      |             ^~~~~~~~~~~~~~~
+  188 |                 "Usage: %s -c config.cfg -f audio.wav\n", argv[0]);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:187:13: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:195:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  195 |         fprintf(stderr, "Error: -f <audio.wav> required\n");
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:195:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:203:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  203 |     fprintf(stdout, "PCD T31 - Milestone 1 Demo \n");
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:203:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:204:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  204 |     fprintf(stdout, "Config: port=%d  output_dir=%s  log_level=%d\n",
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  205 |             cfg.port, cfg.output_dir, cfg.log_level);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:204:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:215:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  215 |     snprintf(output_path, sizeof(output_path),
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  216 |              "%s/demo_%d.bin", cfg.output_dir, (int)getpid());
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:215:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:223:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  223 |     fprintf(stdout, "\n[parent %d] Forking worker...\n", (int)getpid());
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:223:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:235:9: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  235 |         exit(EXIT_SUCCESS);
+      |         ^
+/home/alina/pcd-t31/src/demo_milestone1.c:243:10: error: variable name 'p' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  243 |     char*p=(char *)&res;
+      |          ^
+/home/alina/pcd-t31/src/demo_milestone1.c:246:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  246 |         ssize_t n=read(pipefd[0], p, rem);
+      |                 ^
+/home/alina/pcd-t31/src/demo_milestone1.c:247:18: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+  247 |         if (n<=0) break;
+      |                  ^      
+      |                   {
+/home/alina/pcd-t31/src/demo_milestone1.c:258:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  258 |     fprintf(stdout, "\n--- Result (from child via pipe) ---\n");
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:258:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:259:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  259 |     fprintf(stdout, "  Status      : %d (%s)\n", res.status, res.error_msg);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:259:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:261:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  261 |         fprintf(stdout, "  Output file : %s\n", res.output_path);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:261:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:262:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  262 |         fprintf(stdout, "  Sample rate : %d Hz\n", res.sample_rate);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:262:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:263:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  263 |         fprintf(stdout, "  Mel bands   : %d\n",    res.n_mels);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:263:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:264:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  264 |         fprintf(stdout, "  Time frames : %d\n",    res.n_frames);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:264:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/demo_milestone1.c:265:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  265 |         fprintf(stdout, "  Duration    : %.2f s\n", res.duration_s);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/demo_milestone1.c:265:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/inetds2.c:24:1: error: included header signal.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   24 | #include <signal.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   25 | /* pentru gestionarea semnalelor */
+/home/alina/pcd-t31/src/inetds2.c:30:1: error: included header types.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   30 | #include <sys/types.h>
+      | ^~~~~~~~~~~~~~~~~~~~~~
+   31 | /* pentru tipuri de date sistem */
+/home/alina/pcd-t31/src/inetds2.c:39:1: error: included header server.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   39 | #include "server.h"
+      | ^~~~~~~~~~~~~~~~~~~
+   40 | /* pentru definitii ale serverului */
+/home/alina/pcd-t31/src/inetds2.c:47:29: error: parameter name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   47 | static ssize_t read_all(int fd, void*buf, size_t len)
+      |                             ^
+/home/alina/pcd-t31/src/inetds2.c:52:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   52 |         ssize_t n=read(fd, ptr, rem);
+      |                 ^
+/home/alina/pcd-t31/src/inetds2.c:64:30: error: parameter name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   64 | static ssize_t write_all(int fd, const void*buf, size_t len)
+      |                              ^
+/home/alina/pcd-t31/src/inetds2.c:69:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   69 |         ssize_t n=write(fd, ptr, rem);
+      |                 ^
+/home/alina/pcd-t31/src/inetds2.c:83:11: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   83 |     (void)fprintf(stdout, "[inetds] Client connected: %s\n", client_ip);
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:83:11: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   83 |     (void)fprintf(stdout, "[inetds] Client connected: %s\n", client_ip);
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:86:5: error: no header providing "uint32_t" is directly included [misc-include-cleaner,-warnings-as-errors]
+   14 |     uint32_t req_len=0;
+      |     ^
+/home/alina/pcd-t31/src/inetds2.c:88:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   88 |         (void)fprintf(stderr, "[inetds] Failed to read request length\n");
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:88:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   88 |         (void)fprintf(stderr, "[inetds] Failed to read request length\n");
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:94:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   94 |         (void)fprintf(stderr, "[inetds] Bad request size: %u (expected %zu)\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:94:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   94 |         (void)fprintf(stderr, "[inetds] Bad request size: %u (expected %zu)\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:101:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  101 |         (void)perror("[inetds] read request");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetds2.c:113:11: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  113 |     (void)memset(&res, 0, sizeof(res));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:113:11: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  113 |     (void)memset(&res, 0, sizeof(res));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:121:11: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  121 |     (void)fprintf(stdout, "[inetds] Response sent: status=%d  msg=%s\n",
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:121:11: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  121 |     (void)fprintf(stdout, "[inetds] Response sent: status=%d  msg=%s\n",
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:142:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  142 |         (void)perror("[inetds] socket");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetds2.c:151:11: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  151 |     (void)memset(&addr, 0, sizeof(addr));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:151:11: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  151 |     (void)memset(&addr, 0, sizeof(addr));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/inetds2.c:154:26: error: no header providing "uint16_t" is directly included [misc-include-cleaner,-warnings-as-errors]
+  154 |     addr.sin_port=htons((uint16_t)port);
+      |                          ^
+/home/alina/pcd-t31/src/inetds2.c:157:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  157 |         (void)perror("[inetds] bind");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetds2.c:163:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  163 |         (void)perror("[inetds] listen");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetds2.c:168:11: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  168 |     (void)fprintf(stdout, "[inetds] Raw TCP server on port %d\n", port);
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:168:11: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  168 |     (void)fprintf(stdout, "[inetds] Raw TCP server on port %d\n", port);
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/inetds2.c:179:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  179 |             (void)perror("[inetds] accept");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetds2.c:189:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  189 |             (void)perror("[inetds] fork");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetds2.c:198:13: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  198 |             exit(EXIT_SUCCESS);
+      |             ^
+/home/alina/pcd-t31/src/inetsample2.c:21:1: error: included header errno.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   21 | #include <errno.h>
+      | ^~~~~~~~~~~~~~~~~~
+   22 | /* pentru gestionarea erorilor */
+/home/alina/pcd-t31/src/inetsample2.c:23:1: error: included header getopt.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   23 | #include <getopt.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   24 | #include <arpa/inet.h>
+/home/alina/pcd-t31/src/inetsample2.c:24:1: error: included header inet.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   24 | #include <arpa/inet.h>
+      | ^~~~~~~~~~~~~~~~~~~~~~
+   25 | /* pentru conversii adrese IP */
+/home/alina/pcd-t31/src/inetsample2.c:44:29: error: parameter name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   44 | static ssize_t read_all(int fd, void*buf, size_t len)
+      |                             ^
+/home/alina/pcd-t31/src/inetsample2.c:49:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   49 |         ssize_t n=read(fd, ptr, rem);
+      |                 ^
+/home/alina/pcd-t31/src/inetsample2.c:50:18: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+   50 |         if (n<=0) return (ssize_t)(len - rem);
+      |                  ^                            
+      |                   {
+/home/alina/pcd-t31/src/inetsample2.c:56:30: error: parameter name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   56 | static ssize_t write_all(int fd, const void*buf, size_t len)
+      |                              ^
+/home/alina/pcd-t31/src/inetsample2.c:61:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   61 |         ssize_t n=write(fd, ptr, rem);
+      |                 ^
+/home/alina/pcd-t31/src/inetsample2.c:62:19: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+   62 |         if (n < 0) return -1;
+      |                   ^          
+      |                    {
+/home/alina/pcd-t31/src/inetsample2.c:75:5: error: multiple declarations in a single statement reduces readability [readability-isolate-declaration,-warnings-as-errors]
+   75 |     struct addrinfo hints, *ai;
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:75:29: error: variable name 'ai' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   75 |     struct addrinfo hints, *ai;
+      |                             ^
+/home/alina/pcd-t31/src/inetsample2.c:80:19: error: 8 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+   80 |     char port_str[8];
+      |                   ^
+/home/alina/pcd-t31/src/inetsample2.c:84:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   84 |         (void)perror("[raw_client] getaddrinfo");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetsample2.c:88:9: error: variable name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   88 |     int fd=socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+      |         ^
+/home/alina/pcd-t31/src/inetsample2.c:90:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   90 |         (void)perror("[raw_client] socket");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetsample2.c:96:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   96 |         (void)perror("[raw_client] connect");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/inetsample2.c:104:5: error: no header providing "uint32_t" is directly included [misc-include-cleaner,-warnings-as-errors]
+   13 |     uint32_t len_net=htonl((uint32_t)sizeof(proc_request_t));
+      |     ^
+/home/alina/pcd-t31/src/inetsample2.c:147:21: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  147 |     const char*host=getenv(ENV_RAW_SERVER);
+      |                     ^
+/home/alina/pcd-t31/src/inetsample2.c:150:25: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  150 |     const char*port_env=getenv(ENV_RAW_PORT);
+      |                         ^
+/home/alina/pcd-t31/src/inetsample2.c:151:53: error: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+  151 |     int port=port_env ? (int)strtol(port_env, NULL, 10) : 9090;
+      |                                                     ^
+/home/alina/pcd-t31/src/inetsample2.c:151:59: error: 9090 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+  151 |     int port=port_env ? (int)strtol(port_env, NULL, 10) : 9090;
+      |                                                           ^
+/home/alina/pcd-t31/src/inetsample2.c:155:9: error: variable name 'sr' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+  155 |     int sr=DEFAULT_SR;
+      |         ^
+/home/alina/pcd-t31/src/inetsample2.c:159:17: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  159 |     while ((opt=getopt(argc, argv, "h:p:f:m:r:?"))!=-1) {
+      |                 ^
+/home/alina/pcd-t31/src/inetsample2.c:160:9: error: switching on non-enum value without default case may not cover all cases [bugprone-switch-missing-default-case,-warnings-as-errors]
+  160 |         switch (opt) {
+      |         ^
+/home/alina/pcd-t31/src/inetsample2.c:162:18: error: no header providing "optarg" is directly included [misc-include-cleaner,-warnings-as-errors]
+   13 |             host=optarg;
+      |                  ^
+/home/alina/pcd-t31/src/inetsample2.c:167:47: error: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+  167 |             port=(int)strtol(optarg, &endptr, 10);
+      |                                               ^
+/home/alina/pcd-t31/src/inetsample2.c:206:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  206 |     snprintf(req.output_path, MAX_PATH_LEN, "./output/raw_%d.bin", (int)getpid());
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:206:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/inetsample2.c:215:9: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+  215 |         fprintf(stderr, "[inetsample2] Call failed\n");
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/inetsample2.c:215:9: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/inetsample2.c:221:2: error: expected '}' [clang-diagnostic-error]
+  221 | }
+      |  ^
+/home/alina/pcd-t31/src/inetsample2.c:160:22: note: to match this '{'
+  160 |         switch (opt) {
+      |                      ^
+/home/alina/pcd-t31/src/server.c:27:1: error: included header types.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   27 | #include <sys/types.h>
+      | ^~~~~~~~~~~~~~~~~~~~~~
+   28 | /* pentru tipuri de date sistem */
+/home/alina/pcd-t31/src/server.c:33:1: error: included header fcntl.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   33 | #include <fcntl.h>
+      | ^~~~~~~~~~~~~~~~~~
+   34 | /* pentru controlul descriptorilor de fisiere */
+/home/alina/pcd-t31/src/server.c:35:1: error: included header getopt.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   35 | #include <getopt.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   36 | 
+/home/alina/pcd-t31/src/server.c:38:1: error: included header libconfig.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   38 | #include <libconfig.h>
+      | ^~~~~~~~~~~~~~~~~~~~~~
+   39 | 
+/home/alina/pcd-t31/src/server.c:49:1: error: included header processing.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   49 | #include "processing.h"
+      | ^~~~~~~~~~~~~~~~~~~~~~~
+   50 | /* pentru functii de procesare audio */
+/home/alina/pcd-t31/src/server.c:93:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   93 |     fprintf(stdout, "[server] Listening on port %d (SOAP endpoint: %s)\n",
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   94 |             cfg->port, cfg->soap_endpoint);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/server.c:93:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/server.c:107:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  107 |             (void)perror("[server] fork");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/server.c:118:13: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  118 |             exit(EXIT_SUCCESS);
+      |             ^
+/home/alina/pcd-t31/src/server.c:131:27: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+  131 |     while (wait(NULL) > 0)
+      |                           ^
+      |                            {
+  132 |         ;
+      |          
+/home/alina/pcd-t31/src/server.c:146:17: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  146 |     while ((opt=getopt(argc, argv, "c:p:vh"))!=-1) {
+      |                 ^
+/home/alina/pcd-t31/src/server.c:149:22: error: no header providing "optarg" is directly included [misc-include-cleaner,-warnings-as-errors]
+   15 |             cfg_path=optarg;
+      |                      ^
+/home/alina/pcd-t31/src/server.c:154:56: error: 10 is a magic number; consider replacing it with a named constant [readability-magic-numbers,-warnings-as-errors]
+  154 |             port_override=(int)strtol(optarg, &endptr, 10);
+      |                                                        ^
+/home/alina/pcd-t31/src/server.c:192:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  192 |         (void)perror("[server] mkdir output_dir");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/server.c:214:9: error: redefinition of 'ret_code' [clang-diagnostic-error]
+  214 |     int ret_code=run_soap_server(&soap, &g_cfg);
+      |         ^
+/home/alina/pcd-t31/src/server.c:172:9: note: previous definition is here
+  172 |     int ret_code=config_load(cfg_path, &g_cfg);
+      |         ^
+/home/alina/pcd-t31/src/soapds.c:14:1: error: included header stdlib.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   14 | #include <stdlib.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   15 | /* pentru alocare de memorie si functii utilitare */
+/home/alina/pcd-t31/src/soapds.c:43:5: error: the value returned by this function should not be disregarded; neglecting it may lead to errors [cert-err33-c,-warnings-as-errors]
+   43 |     snprintf(buf, bufsz, "%s/%s_%d_%d.bin",
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   44 |              outdir, basename_hint, (int)getpid(), counter++);
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/alina/pcd-t31/src/soapds.c:43:5: note: cast the expression to void to silence this warning
+/home/alina/pcd-t31/src/soapds.c:43:5: error: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   43 |     snprintf(buf, bufsz, "%s/%s_%d_%d.bin",
+      |     ^~~~~~~~
+/home/alina/pcd-t31/src/soapds.c:43:5: note: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11
+   43 |     snprintf(buf, bufsz, "%s/%s_%d_%d.bin",
+      |     ^~~~~~~~
+/home/alina/pcd-t31/src/soapds.c:60:11: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   60 |     (void)memset(&preq, 0, sizeof(preq));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/soapds.c:60:11: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+   60 |     (void)memset(&preq, 0, sizeof(preq));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/soapds.c:62:11: error: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   62 |     (void)memcpy(preq.input_path, req->inputFilePath, MAX_PATH_LEN - 1);
+      |           ^~~~~~
+/home/alina/pcd-t31/src/soapds.c:62:11: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+   62 |     (void)memcpy(preq.input_path, req->inputFilePath, MAX_PATH_LEN - 1);
+      |           ^~~~~~
+/home/alina/pcd-t31/src/soapds.c:76:11: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   76 |     (void)memset(&pres, 0, sizeof(pres));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/soapds.c:76:11: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+   76 |     (void)memset(&pres, 0, sizeof(pres));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/threeds.c:24:1: error: included header unistd.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   24 | #include <unistd.h>
+      | ^~~~~~~~~~~~~~~~~~~
+   25 | /* pentru functii POSIX de sistem */
+/home/alina/pcd-t31/src/threeds.c:31:1: error: included header server.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   31 | #include "server.h"
+      | ^~~~~~~~~~~~~~~~~~~
+   32 | /* pentru definitii ale serverului */
+/home/alina/pcd-t31/src/threeds.c:71:11: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   71 |     (void)fprintf(stdout, "[threeds] Thread-per-request SOAP server started\n");
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/threeds.c:71:11: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   71 |     (void)fprintf(stdout, "[threeds] Thread-per-request SOAP server started\n");
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/threeds.c:84:19: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   84 |             (void)fprintf(stderr, "[threeds] soap_copy failed\n");
+      |                   ^~~~~~~
+/home/alina/pcd-t31/src/threeds.c:84:19: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   84 |             (void)fprintf(stderr, "[threeds] soap_copy failed\n");
+      |                   ^~~~~~~
+/home/alina/pcd-t31/src/threeds.c:91:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   91 |             (void)perror("[threeds] malloc");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/threeds.c:97:9: error: no header providing "pthread_t" is directly included [misc-include-cleaner,-warnings-as-errors]
+   16 |         pthread_t tid;
+      |         ^
+/home/alina/pcd-t31/src/threeds.c:99:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   99 |             (void)perror("[threeds] pthread_create");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:25:1: error: included header fcntl.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   25 | #include <fcntl.h>
+      | ^~~~~~~~~~~~~~~~~~
+   26 | /* pentru controlul descriptorilor de fisiere */
+/home/alina/pcd-t31/src/unixds.c:27:1: error: included header types.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   27 | #include <sys/types.h>
+      | ^~~~~~~~~~~~~~~~~~~~~~
+   28 | /* pentru tipuri de date sistem */
+/home/alina/pcd-t31/src/unixds.c:37:1: error: included header server.h is not used directly [misc-include-cleaner,-warnings-as-errors]
+   37 | #include "server.h"
+      | ^~~~~~~~~~~~~~~~~~~
+   38 | /* pentru definitii ale serverului */
+/home/alina/pcd-t31/src/unixds.c:45:30: error: parameter name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   45 | static int unix_recv_all(int fd, void*buf, size_t len)
+      |                              ^
+/home/alina/pcd-t31/src/unixds.c:50:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   50 |         ssize_t n=read(fd, ptr, rem);
+      |                 ^
+/home/alina/pcd-t31/src/unixds.c:52:30: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+   52 |             if (errno==EINTR) continue;
+      |                              ^         
+      |                               {
+/home/alina/pcd-t31/src/unixds.c:55:18: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+   55 |         if (n==0) return -1; /* EOF - client disconnected */
+      |                  ^                                          
+      |                   {
+/home/alina/pcd-t31/src/unixds.c:63:30: error: parameter name 'fd' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   63 | static int unix_send_all(int fd, const void*buf, size_t len)
+      |                              ^
+/home/alina/pcd-t31/src/unixds.c:68:17: error: variable name 'n' is too short, expected at least 3 characters [readability-identifier-length,-warnings-as-errors]
+   68 |         ssize_t n=write(fd, ptr, rem);
+      |                 ^
+/home/alina/pcd-t31/src/unixds.c:70:30: error: statement should be inside braces [readability-braces-around-statements,-warnings-as-errors]
+   70 |             if (errno==EINTR) continue;
+      |                              ^         
+      |                               {
+/home/alina/pcd-t31/src/unixds.c:84:5: error: no header providing "uint32_t" is directly included [misc-include-cleaner,-warnings-as-errors]
+   15 |     uint32_t msg_len=0;
+      |     ^
+/home/alina/pcd-t31/src/unixds.c:86:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   86 |         (void)perror("[unixds] recv msg_len");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:91:15: error: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+   91 |         (void)fprintf(stderr, "[unixds] Unexpected msg_len %u (expected %zu)\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:91:15: note: Call to function 'fprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+   91 |         (void)fprintf(stderr, "[unixds] Unexpected msg_len %u (expected %zu)\n",
+      |               ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:99:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+   99 |         (void)perror("[unixds] recv request");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:105:11: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  105 |     (void)memset(&res, 0, sizeof(res));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:105:11: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  105 |     (void)memset(&res, 0, sizeof(res));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:131:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  131 |         (void)perror("[unixds] socket");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:136:11: error: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  136 |     (void)memset(&addr, 0, sizeof(addr));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:136:11: note: Call to function 'memset' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memset_s' in case of C11
+  136 |     (void)memset(&addr, 0, sizeof(addr));
+      |           ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:138:11: error: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  138 |     (void)memcpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+      |           ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:138:11: note: Call to function 'memcpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'memcpy_s' in case of C11
+  138 |     (void)memcpy(addr.sun_path, UNIX_SOCKET_PATH, sizeof(addr.sun_path) - 1);
+      |           ^~~~~~
+/home/alina/pcd-t31/src/unixds.c:142:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  142 |         (void)perror("[unixds] bind");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:148:9: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  148 |         (void)perror("[unixds] listen");
+      |         ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:153:11: error: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-warnings-as-errors]
+  153 |     (void)fprintf(stdout, "[unixds] Listening on %s\n", UNIX_SOCKET_PATH);
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:153:11: note: Call to function 'fprintf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'fprintf_s' in case of C11
+  153 |     (void)fprintf(stdout, "[unixds] Listening on %s\n", UNIX_SOCKET_PATH);
+      |           ^~~~~~~
+/home/alina/pcd-t31/src/unixds.c:159:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  159 |             (void)perror("[unixds] accept");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:165:13: error: redundant explicit casting to the same type 'void' as the sub-expression, remove this casting [readability-redundant-casting,-warnings-as-errors]
+  165 |             (void)perror("[unixds] fork");
+      |             ^~~~~~
+/usr/include/stdio.h:878:13: note: source type originates from the invocation of this function
+  878 | extern void perror (const char *__s) __COLD;
+      |        ~~~~ ^
+/home/alina/pcd-t31/src/unixds.c:174:13: error: function is not thread safe [concurrency-mt-unsafe,-warnings-as-errors]
+  174 |             exit(EXIT_SUCCESS);
+      |             ^
+Suppressed 55639 warnings (55639 in non-user code).
+Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
+184 warnings treated as errors

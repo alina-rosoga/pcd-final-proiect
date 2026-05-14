@@ -32,6 +32,8 @@ extern "C" {
 /* pentru definitii ale serverului */
 }
 
+#define DIR_PERMISSIONS 0755
+
 /* Citire WAV simplu via sndfile sau fallback manual                   */
 /* Folosim librosa::incarca daca exista, altfel citim WAV manual          */
 
@@ -40,7 +42,7 @@ static int read_wav_samples(const char*path, float **out_samples,
                              int*out_n, int*out_sr)
 {
     FILE*f=fopen(path, "rb");
-    if (!f) return -1;
+    if (!f) { return -1; }
 
     /* WAV antet - 44 bytes standard */
     uint8_t hdr[44];
@@ -155,19 +157,20 @@ static int process_spectrogram_worker(const proc_request_t*req,
     }
 
     int32_t hdr[2]={ (int32_t)rows, (int32_t)cols };
-    write(fd, hdr, sizeof(hdr));
+    (void)write(fd, hdr, sizeof(hdr));
 
     /* Eigen stocheaza column-major, scriem row-major */
     for (int r=0; r < rows; r++) {
         for (int c=0; c < cols; c++) {
             float v=mel_db(r, c);
-            write(fd, &v, sizeof(float));
+            (void)write(fd, &v, sizeof(float));
         }
     }
-    close(fd);
+    (void)close(fd);
 
-    strncpy(res->output_path, req->output_path, MAX_PATH_LEN - 1);
-    snprintf(res->error_msg, sizeof(res->error_msg), "OK");
+    (void)memcpy(res->output_path, req->output_path, MAX_PATH_LEN - 1);
+    res->output_path[MAX_PATH_LEN - 1]='\0';
+    (void)snprintf(res->error_msg, sizeof(res->error_msg), "OK");
     return 0;
 }
 
@@ -176,50 +179,50 @@ extern "C"
 int process_spectrogram(const proc_request_t*req, proc_result_t*res)
 {
     int pipefd[2];
-    if (pipe(pipefd)!=0) { perror("[processing] pipe"); return -1; }
+    if (pipe(pipefd)!=0) { (void)perror("[processing] pipe"); return -1; }
 
     pid_t pid=fork();
     if (pid < 0) {
-        perror("[processing] fork");
-        close(pipefd[0]); close(pipefd[1]);
+        (void)perror("[processing] fork");
+        (void)close(pipefd[0]); (void)close(pipefd[1]);
         return -1;
     }
 
     if (pid==0) {
         /* copil */
-        close(pipefd[0]);
+        (void)close(pipefd[0]);
 
         proc_result_t child_res;
-        memset(&child_res, 0, sizeof(child_res));
+        (void)memset(&child_res, 0, sizeof(child_res));
 
-        int rc=process_spectrogram_worker(req, &child_res);
-        child_res.status=rc;
+        int ret_code=process_spectrogram_worker(req, &child_res);
+        child_res.status=ret_code;
 
         const char*ptr=(const char *)&child_res;
         size_t rem=sizeof(child_res);
         while (rem > 0) {
             ssize_t n=write(pipefd[1], ptr, rem);
-            if (n < 0) break;
+            if (n < 0) { break; }
             ptr +=n; rem -=(size_t)n;
         }
-        close(pipefd[1]);
-        _exit(rc==0 ? 0 : 1);
+        (void)close(pipefd[1]);
+        _exit(ret_code==0 ? 0 : 1);
     }
 
     /* parinte */
-    close(pipefd[1]);
+    (void)close(pipefd[1]);
 
-    memset(res, 0, sizeof(*res));
+    (void)memset(res, 0, sizeof(*res));
     char*ptr=(char *)res;
     size_t rem=sizeof(*res);
     while (rem > 0) {
         ssize_t n=read(pipefd[0], ptr, rem);
-        if (n<=0) break;
+        if (n<=0) { break; }
         ptr +=n; rem -=(size_t)n;
     }
-    close(pipefd[0]);
+    (void)close(pipefd[0]);
 
     int status;
-    waitpid(pid, &status, 0);
+    (void)waitpid(pid, &status, 0);
     return (WIFEXITED(status) && WEXITSTATUS(status)==0) ? 0 : -1;
 }

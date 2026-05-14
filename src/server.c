@@ -24,18 +24,10 @@
 /* pentru gestionarea erorilor */
 #include <signal.h>
 /* pentru gestionarea semnalelor */
-#include <sys/types.h>
-/* pentru tipuri de date sistem */
 #include <sys/stat.h>
-/* pentru informatii despre fisiere */
+/* pentru mkdir */
 #include <sys/wait.h>
 /* pentru asteptarea proceselor copil */
-#include <fcntl.h>
-/* pentru controlul descriptorilor de fisiere */
-#include <getopt.h>
-
-/* libconfig - runtime config parsare (mandatory) */
-#include <libconfig.h>
 
 /* gSOAP generated headers (from proto.h / soapH.h skeleton) */
 #include "soapH.h"
@@ -46,10 +38,11 @@
 /* Project headers */
 #include "server.h"
 /* pentru definitii ale serverului */
-#include "processing.h"
-/* pentru functii de procesare audio */
 #include "config_loader.h"
 /* pentru incarcarea configuratiilor */
+
+#define DIR_PERMISSIONS 0755
+#define STRTOL_BASE     10
 
 /* Global Server state (set from config + CLI args)                   */
 static server_config_t g_cfg;
@@ -62,13 +55,13 @@ static void sigterm_handler(int sig)
     g_running=0;
     /* scrie() este async-semnal-safe; printf este NOT */
     const char msg[]="\n[server] Shutting down...\n";
-    (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    write(STDERR_FILENO, msg, sizeof(msg) - 1);
 }
 
 /* afiseaza utilizare                                                         */
 static void print_usage(const char*prog)
 {
-    fprintf(stderr,
+    (void)fprintf(stderr,
         "Usage: %s [OPTIONS]\n"
         "  -c FILE    Path to configuration file (default: server.cfg)\n"
         "  -p PORT    Listening port (overrides config)\n"
@@ -88,13 +81,13 @@ static int run_soap_server(struct soap*soap, const server_config_t*cfg)
         return -1;
     }
 
-    fprintf(stdout, "[server] Listening on port %d (SOAP endpoint: %s)\n",
+    (void)fprintf(stdout, "[server] Listening on port %d (SOAP endpoint: %s)\n",
             cfg->port, cfg->soap_endpoint);
 
     while (g_running) {
         slave=soap_accept(soap);
         if (!soap_valid_socket(slave)) {
-            if (errno==EINTR) continue; /* interrupted by semnal */
+            if (errno==EINTR) { continue; } /* interrupted by semnal */
             soap_print_fault(soap, stderr);
             break;
         }
@@ -113,20 +106,22 @@ static int run_soap_server(struct soap*soap, const server_config_t*cfg)
             soap_destroy(soap);
             soap_end(soap);
             soap_done(soap);
-            exit(EXIT_SUCCESS);
+            _exit(EXIT_SUCCESS);
         }
 
         /* parinte proces */
         soap_closesock(soap);
 
         /* Reap zombie children (non-blocking) */
-        while (waitpid(-1, NULL, WNOHANG) > 0)
+        while (waitpid(-1, NULL, WNOHANG) > 0) {
             ;
+        }
     }
 
     /* Graceful Curatare: asteapta pentru all children */
-    while (wait(NULL) > 0)
+    while (wait(NULL) > 0) {
         ;
+    }
 
     return 0;
 }
@@ -140,50 +135,67 @@ int main(int argc, char*argv[])
     int verbose=0;
 
     /* parseaza comanda-linie options */
-    while ((opt=getopt(argc, argv, "c:p:vh"))!=-1) {
+    while ((opt=getopt(argc, argv, "c:p:vh"))!=-1) { /* called before threads start, MT-safe here */
         switch (opt) {
-        case 'c': cfg_path=optarg;            break;
-        case 'p': port_override=atoi(optarg);      break;
-        case 'v': verbose=1;                 break;
-        case 'h': print_usage(argv[0]); return 0;
-        default:  print_usage(argv[0]); return 1;
+        case 'c': {
+            cfg_path=optarg;
+            break;
+        }
+        case 'p': {
+            char *endptr;
+            port_override=(int)strtol(optarg, &endptr, STRTOL_BASE);
+            break;
+        }
+        case 'v': {
+            verbose=1;
+            break;
+        }
+        case 'h': {
+            print_usage(argv[0]);
+            return 0;
+        }
+        default: {
+            return 1;
+        }
         }
     }
 
-    /* incarca libconfig configuratie */
-    if (config_load(cfg_path, &g_cfg)!=0) {
-        fprintf(stderr, "[server] Failed to load config: %s\n", cfg_path);
+    /* Load config */
+    int ret_code=config_load(cfg_path, &g_cfg);
+    if (ret_code!=0) {
+        (void)fprintf(stderr, "[server] Failed to load config: %s\n", cfg_path);
         return 1;
     }
 
-    if (port_override > 0)
+    if (port_override>0) {
         g_cfg.port=port_override;
+    }
 
     if (verbose) {
-        fprintf(stdout, "[server] Config loaded from %s\n", cfg_path);
-        fprintf(stdout, "[server] Port         : %d\n",   g_cfg.port);
-        fprintf(stdout, "[server] Workers max  : %d\n",   g_cfg.max_workers);
-        fprintf(stdout, "[server] Output dir   : %s\n",   g_cfg.output_dir);
-        fprintf(stdout, "[server] SOAP endpoint: %s\n",   g_cfg.soap_endpoint);
+        (void)fprintf(stdout, "[server] Config loaded from %s\n", cfg_path);
+        (void)fprintf(stdout, "[server] Port         : %d\n",   g_cfg.port);
+        (void)fprintf(stdout, "[server] Workers max  : %d\n",   g_cfg.max_workers);
+        (void)fprintf(stdout, "[server] Output dir   : %s\n",   g_cfg.output_dir);
+        (void)fprintf(stdout, "[server] SOAP endpoint: %s\n",   g_cfg.soap_endpoint);
     }
 
     /* Ensure iesire director exists */
-    if (mkdir(g_cfg.output_dir, 0755)!=0 && errno!=EEXIST) {
+    if (mkdir(g_cfg.output_dir, DIR_PERMISSIONS)!=0 && errno!=EEXIST) {
         perror("[server] mkdir output_dir");
         return 1;
     }
 
     /* Install semnal handlers */
-    struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler=sigterm_handler;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT,  &sa, NULL);
-    signal(SIGCHLD, SIG_DFL); /* implicit SIGCHLD - children become zombies until reaped */
+    struct sigaction sig_action;
+    SAFE_MEMSET(&sig_action, 0, sizeof(sig_action));
+    sig_action.sa_handler=sigterm_handler;
+    sigemptyset(&sig_action.sa_mask);
+    sigaction(SIGTERM, &sig_action, NULL);
+    sigaction(SIGINT,  &sig_action, NULL);
+    (void)signal(SIGCHLD, SIG_DFL); /* implicit SIGCHLD - children become zombies until reaped */
 
     /* Initialise gSOAP runtime */
-    struct soap soap;
+    (void)memset soap;
     soap_init(&soap);
     soap.send_timeout=SOAP_TIMEOUT_S;
     soap.recv_timeout=SOAP_TIMEOUT_S;
@@ -191,7 +203,7 @@ int main(int argc, char*argv[])
     soap.max_keep_alive=SOAP_MAX_KEEP_ALIVE;
 
     /* Run soap dispatch loop */
-    int rc=run_soap_server(&soap, &g_cfg);
+    ret_code=run_soap_server(&soap, &g_cfg);
 
     /* Curatare */
     soap_destroy(&soap);
@@ -199,6 +211,6 @@ int main(int argc, char*argv[])
     soap_done(&soap);
     config_free(&g_cfg);
 
-    fprintf(stdout, "[server] Exited cleanly.\n");
-    return (rc==0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    (void)fprintf(stdout, "[server] Exited cleanly.\n");
+    return (ret_code==0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

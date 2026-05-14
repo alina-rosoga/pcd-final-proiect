@@ -44,6 +44,8 @@ extern "C" {
 /* pentru functii de procesare audio */
 }
 
+#define DIR_PERMISSIONS 0755
+
 /* print_env_info: demonstreaza getenv                                */
 static void print_env_info(void)
 {
@@ -52,18 +54,18 @@ static void print_env_info(void)
     const char*pcd=getenv("PCD_SERVER");
     const char*path=getenv("PATH");
 
-    printf("\n--- Environment Variables (getenv) ---\n");
-    printf("  HOME       = %s\n", home ? home : "(not set)");
-    printf("  USER       = %s\n", user ? user : "(not set)");
-    printf("  PCD_SERVER = %s\n", pcd  ? pcd  : "(not set)");
-    printf("  PATH       = %.80s...\n", path ? path : "(not set)");
+    (void)printf("\n--- Environment Variables (getenv) ---\n");
+    (void)printf("  HOME       = %s\n", home ? home : "(not set)");
+    (void)printf("  USER       = %s\n", user ? user : "(not set)");
+    (void)printf("  PCD_SERVER = %s\n", pcd  ? pcd  : "(not set)");
+    (void)printf("  PATH       = %.80s...\n", path ? path : "(not set)");
 }
 
 /* Citire WAV PCM 16-bit (fara dependente extra)                      */
 static int read_wav(const char*path, float **out, int*n, int*sr)
 {
     FILE*f=fopen(path, "rb");
-    if (!f) { perror("fopen wav"); return -1; }
+    if (!f) { (void)perror("fopen wav"); return -1; }
 
     /* Cauta chunk-urile RIFF corect - sare peste sub-chunk-uri necunoscute */
     uint8_t hdr[12];
@@ -215,17 +217,26 @@ int main(int argc, char*argv[])
     int opt;
     while ((opt=getopt(argc, argv, "c:f:h"))!=-1) {
         switch (opt) {
-        case 'c': cfg_path=optarg; break;
-        case 'f': audio_path=optarg; break;
-        case 'h':
-            printf("Usage: %s -c config.cfg -f audio.wav\n", argv[0]);
+        case 'c': {
+            cfg_path=optarg;
+            break;
+        }
+        case 'f': {
+            audio_path=optarg;
+            break;
+        }
+        case 'h': {
+            (void)printf("Usage: %s -c config.cfg -f audio.wav\n", argv[0]);
             return 0;
-        default: return 1;
+        }
+        default: {
+            return 1;
+        }
         }
     }
 
     if (!audio_path) {
-        fprintf(stderr, "Eroare: -f <audio.wav> obligatoriu\n");
+        (void)fprintf(stderr, "Eroare: -f <audio.wav> obligatoriu\n");
         return 1;
     }
 
@@ -233,65 +244,65 @@ int main(int argc, char*argv[])
     server_config_t cfg;
     config_load(cfg_path, &cfg);
 
-    printf("=== PCD T31 - Milestone 1 Demo ===\n");
-    printf("Config: port=%d  output_dir=%s  log_level=%d\n",
+    (void)printf("PCD T31 - Milestone 1 Demo\n");
+    (void)printf("Config: port=%d  output_dir=%s  log_level=%d\n",
            cfg.port, cfg.output_dir, cfg.log_level);
 
     /* 3. getenv - afiseaza variabile de mediu */
     print_env_info();
 
     /* Creeaza directorul iesire daca nu exista */
-    mkdir(cfg.output_dir, 0755);
+    (void)mkdir(cfg.output_dir, DIR_PERMISSIONS);
 
     /* Construieste calea fisierului iesire */
     char output_path[MAX_PATH_LEN];
-    snprintf(output_path, sizeof(output_path),
+    (void)snprintf(output_path, sizeof(output_path),
              "%s/demo_%d.bin", cfg.output_dir, (int)getpid());
 
     /* 4. pipe - canal IPC intre parinte si copil */
     int pipefd[2];
-    if (pipe(pipefd)!=0) { perror("pipe"); return 1; }
+    if (pipe(pipefd)!=0) { (void)perror("pipe"); return 1; }
 
     /* 5. fork - proces copil izolat */
-    printf("\n[parent %d] Forking worker...\n", (int)getpid());
+    (void)printf("\n[parent %d] Forking worker...\n", (int)getpid());
     pid_t pid=fork();
 
-    if (pid < 0) { perror("fork"); return 1; }
+    if (pid < 0) { (void)perror("fork"); return 1; }
 
     if (pid==0) {
         /* Copil */
-        close(pipefd[0]);
+        (void)close(pipefd[0]);
         demo_worker(audio_path, output_path, pipefd[1]);
         _exit(0);
     }
 
     /* Parinte: citeste rezultat din pipe */
-    close(pipefd[1]);
+    (void)close(pipefd[1]);
 
     proc_result_t res;
-    memset(&res, 0, sizeof(res));
+    (void)memset(&res, 0, sizeof(res));
     char*p=(char *)&res;
     size_t rem=sizeof(res);
     while (rem > 0) {
         ssize_t n=read(pipefd[0], p, rem);
-        if (n<=0) break;
+        if (n<=0) { break; }
         p +=n; rem -=(size_t)n;
     }
-    close(pipefd[0]);
+    (void)close(pipefd[0]);
 
     /* Asteapta copilul */
     int wstatus;
-    waitpid(pid, &wstatus, 0);
+    (void)waitpid(pid, &wstatus, 0);
 
     /* Afiseaza rezultatul */
-    printf("\n--- Rezultat (de la copil via pipe) ---\n");
-    printf("  status      : %d (%s)\n", res.status, res.error_msg);
+    (void)printf("\n--- Rezultat (de la copil via pipe) ---\n");
+    (void)printf("  status      : %d (%s)\n", res.status, res.error_msg);
     if (res.status==0) {
-        printf("  output_file : %s\n", res.output_path);
-        printf("  sample_rate : %d Hz\n", res.sample_rate);
-        printf("  n_mels      : %d\n",    res.n_mels);
-        printf("  n_frames    : %d\n",    res.n_frames);
-        printf("  duration    : %.2f s\n",res.duration_s);
+        (void)printf("  output_file : %s\n", res.output_path);
+        (void)printf("  sample_rate : %d Hz\n", res.sample_rate);
+        (void)printf("  n_mels      : %d\n",    res.n_mels);
+        (void)printf("  n_frames    : %d\n",    res.n_frames);
+        (void)printf("  duration    : %.2f s\n",res.duration_s);
     }
 
     config_free(&cfg);

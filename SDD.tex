@@ -1,0 +1,1268 @@
+\documentclass[12pt,a4paper,twoside]{article}
+\usepackage[utf-8]{inputenc}
+\usepackage[romanian]{babel}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{amsmath}
+
+% Setare margini
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm,
+    headheight=15pt,
+    footskip=1cm
+}
+
+% Setare header/footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{PCD T31 - SDD}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{Document de Proiectare --- Serviciu Web SOAP pentru Analiza Audio}
+
+% Configurare listing-uri pentru cod
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    backgroundcolor=\color{gray!5},
+    captionpos=b
+}
+
+% Titlu și informații
+\title{\textbf{PCD T31 --- Serviciu Web SOAP pentru Analiza Audio} \\
+        \large{Software Design Document (SDD)}}
+\author{Aplicație de Procesare Distribuită de Audio}
+\date{Aprilie 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    Acest document prezintă proiectarea detaliată a aplicației \textbf{PCD T31}, 
+    un serviciu web SOAP pentru analiza și procesarea fișierelor audio/video. 
+    Aplicația utilizează gSOAP pentru interfața de web service, LibrosaC pentru 
+    procesarea DSP, libconfig pentru managementul configurației, și POSIX fork() 
+    pentru paralelizare. Documentul acoperă arhitectura sistemului, componentele 
+    principale, tipurile de date, protocoalele de comunicație, și detalii de implementare.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Introducere}
+% =============================================================================
+
+\subsection{Scop și Context}
+
+PCD T31 este o aplicație de procesare distribuită de date (Parallel Computing Distributed), 
+fokusată pe \textbf{analiza spectrogramelor audio în timp real} printr-un serviciu web SOAP.
+
+\textbf{Scopuri principale:}
+\begin{itemize}
+    \item Furnizarea unui serviciu web pentru analiza audio (spectrogram Mel)
+    \item Suportul pentru procesare paralelă via fork()
+    \item Configurație flexibilă la runtime prin libconfig
+    \item Interacțiune client-server SOAP standardizată
+    \item Suportul pentru fișiere audio și video
+\end{itemize}
+
+\subsection{Termeni și Definiții}
+
+\begin{itemize}
+    \item \textbf{SOAP} (Simple Object Access Protocol): Protocol pentru comunicație
+          în servicii web.
+    \item \textbf{gSOAP}: Toolkit open-source pentru generarea codul SOAP în C/C++.
+    \item \textbf{LibrosaC}: Bibliotecă C pentru procesarea audio (spectrogram, MFCC, etc.).
+    \item \textbf{Spectrograma}: Reprezentare vizuală a frecvențelor unui semnal în timp.
+    \item \textbf{Mel scale}: Scală perceptuală a frecvențelor (utilizată în audio ML).
+    \item \textbf{FFT}: Fast Fourier Transform, algoritm pentru calcul frecvență.
+    \item \textbf{Hop length}: Pasul de deplasare în analiza timpului scurt (STFT).
+    \item \textbf{Worker}: Proces copil creat via fork() pentru execuție izolată.
+\end{itemize}
+
+\subsection{Document Overview}
+
+Structura acestui SDD urmează modelul standard IEEE 1016:
+
+\begin{enumerate}
+    \item \textbf{Sec. 2}: Descriere generală a sistemului
+    \item \textbf{Sec. 3}: Structura arhitecturală
+    \item \textbf{Sec. 4}: Componente și module software
+    \item \textbf{Sec. 5}: Interfețe și protocoale
+    \item \textbf{Sec. 6}: Fluxuri de date și control
+    \item \textbf{Sec. 7}: Considerații de dependență și build
+\end{enumerate}
+
+% =============================================================================
+\section{Descriere Generală a Sistemului}
+% =============================================================================
+
+\subsection{Perspectivă Sistem}
+
+PCD T31 implementează o \textbf{arhitectură client-server} unde:
+
+\begin{itemize}
+    \item \textbf{Server (serverds):} Ascultă pe port 8080, acceptă cereri SOAP,
+          spawneaza workers via fork() pentru procesare isolată
+    \item \textbf{Clients (inetclient):} Se conectează la server, trimit cereri SOAP
+          pentru analiza audio, așteaptă și consumă rezultate
+    \item \textbf{Procesare:} Fiecare cerere este executată în procces copil pentru
+          siguritate și paralelism
+    \item \textbf{Configurație:} Runtime config din fișier \texttt{server.cfg} 
+          (format libconfig)
+\end{itemize}
+
+\subsection{Restricții și Limitări}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \toprule
+        \textbf{Restricție} & \textbf{Valoare/Detaliu} \\
+        \midrule
+        Max workers simultani & 4 (configurable) \\
+        Timeout SOAP & 30 secunde \\
+        Max keep-alive per conexiune & 100 cereri \\
+        Max path length & 512 bytes \\
+        Backlog conexiuni TCP & 10 \\
+        Standard C utilizat & C11 (\_POSIX\_C\_SOURCE=200809L) \\
+        Port implicit & 8080 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Dependențe Externe}
+
+\begin{itemize}
+    \item \textbf{gsoap}: Generare cod SOAP C
+    \item \textbf{libconfig}: Parsare fișiere configurație (libconfig/3.2 compatible)
+    \item \textbf{librosacpp (LibrosaC)}: Bibliotecă DSP pentru spectrograme, MFCC, etc.
+    \item \textbf{libpthread}: Suport POSIX threads (dacă folosit în viitor)
+    \item \textbf{libm}: Bibliotecă matematică (pentru pow, log, etc.)
+    \item \textbf{POSIX syscalls}: write(), fork(), waitpid(), open(), read(), close(), etc.
+\end{itemize}
+
+% =============================================================================
+\section{Arhitectura Sistemului}
+% =============================================================================
+
+\subsection{Diagrama Conceptuală}
+
+\begin{verbatim}
+┌─────────────────────────────────────────────────────────────────┐
+│                    CLIENT APPLICATION (inetclient)            │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ SOAP Proxy (generated by gSOAP)                         │   │
+│  │  - soap_call_ns__AnalyzeAudio()                         │   │
+│  │  - HTTP over TCP                                        │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└────────────────────┬──────────────────────────────────────────┬─┘
+                     │ HTTP POST (SOAP envelope)                │ 
+                     │ Port 8080                                │
+┌────────────────────┴──────────────────────────────────────────┴─┐
+│                   SERVER APPLICATION (serverds)               │
+├──────────────────────────────────────────────────────────────────┤
+│ ┌────────────────────────────────────────────────────────────┐  │
+│ │ SOAP Service Handler (main process)                      │  │
+│ │  - soap_serve() loop                                      │  │
+│ │  - Accept conexiuni TCP                                   │  │
+│ │  - Parse SOAP envelope                                    │  │
+│ │  - fork() new worker process                              │  │
+│ └────────────────────────────────────────────────────────────┘  │
+│                           │                                     │
+│    ┌──────────────────────┼──────────────────────┐             │
+│    │                      │                      │             │
+│ ┌──┴────┐  ┌──────┐  ┌────┴─┐  ┌──────┐        │             │
+│ │Worker1│  │Worker2│  │Worker3│  │Worker4│        │             │
+│ │(fork) │  │(fork) │  │(fork) │  │(fork) │        │             │
+│ └───┬───┘  └──┬───┘  └───┬───┘  └──┬───┘        │             │
+│     │         │          │         │            │             │
+│     └─────────┼──────────┼─────────┘            │             │
+│               │          │                      │             │
+│     ┌─────────▼──────────▼──────────┐           │             │
+│     │ Config Loader (libconfig)     │           │             │
+│     │  - port, max_workers, etc.    │           │             │
+│     └─────────────────────────────────┘           │             │
+│                                                   │             │
+│     ┌──────────────────────────────────┐         │             │
+│     │ Processing Module (LibrosaC)     │         │             │
+│     │  - Mel spectrogram               │         │             │
+│     │  - File I/O (output/)            │         │             │
+│     └──────────────────────────────────┘         │             │
+└──────────────────────────────────────────────────┴──────────────┘
+\end{verbatim}
+
+\subsection{Stratificarea Arhitecturii}
+
+Aplicația este organizată în \textbf{4 straturi}:
+
+\begin{enumerate}
+    \item \textbf{Transport Layer}: SOAP/HTTP, geolocalizări gSOAP
+    \item \textbf{Service Layer}: SOAP handlers, request dispatch
+    \item \textbf{Processing Layer}: DSP engine (LibrosaC), audio I/O
+    \item \textbf{Configuration Layer}: Runtime config (libconfig)
+\end{enumerate}
+
+\subsection{Modelul Concurenței}
+
+\textbf{Forking-based parallelism:}
+
+\begin{itemize}
+    \item Procesul principal (serverds) ascultă pe portul SOAP
+    \item La fiecare cerere SOAP, se crează un \textbf{worker process} via \texttt{fork()}
+    \item Workerul procesează solicitarea în spațiu de memorie izolat
+    \item Workerul se termină; procesul principal așteptă via \texttt{waitpid()}
+    \item Max concurrent workers = \texttt{max\_workers} din config
+\end{itemize}
+
+\textbf{Avantaje:}
+\begin{itemize}
+    \item Izolare robustă (crash worker $\neq$ crash server)
+    \item Simplitate (nu trebuie mutex, conditions, etc.)
+    \item Portabilitate (POSIX standard)
+\end{itemize}
+
+% =============================================================================
+\section{Componente și Module Software}
+% =============================================================================
+
+\subsection{Modulul Server (serverds)}
+
+\subsubsection{Fișiere Componente}
+\begin{itemize}
+    \item \texttt{src/server.c} --- Logica server principal
+    \item \texttt{include/server.h} --- Tipuri și constante server
+    \item \texttt{src/soapds.c} --- Implementare SOAP handlers
+\end{itemize}
+
+\subsubsection{Responsabilități}
+
+\begin{itemize}
+    \item Inițializare SOAP service (gSOAP runtime)
+    \item Parsare argumentelor CLI (-c, -p, -v, -h)
+    \item Încărcare configurație din fișier
+    \item Setup signal handlers (SIGTERM pentru graceful shutdown)
+    \item Accept conexiuni TCP
+    \item Dispatch cereri SOAP la handlers
+    \item Fork() workers pentru procesare isolată
+    \item Cleanup și shutdown
+\end{itemize}
+
+\subsubsection{Interfața Publică}
+
+\begin{lstlisting}
+/* Tipul configurației server-ului */
+typedef struct {
+    int  port;                    /* Port SOAP (ex: 8080) */
+    int  max_workers;             /* Max procese worker (ex: 4) */
+    int  log_level;               /* 0=silent, 1=info, 2=debug */
+    char output_dir[MAX_PATH_LEN]; /* Directorul output */
+    char soap_endpoint[MAX_PATH_LEN]; /* URL endpoint */
+} server_config_t;
+
+/* Constante */
+#define DEFAULT_PORT         8080
+#define DEFAULT_CONFIG_PATH  "config/server.cfg"
+#define MAX_PATH_LEN         512
+#define MAX_WORKERS_DEFAULT  4
+#define SOAP_BACKLOG         10
+#define SOAP_TIMEOUT_S       30
+#define SOAP_MAX_KEEP_ALIVE  100
+\end{lstlisting}
+
+\subsection{Modulul SOAP Handlers (soapds.c)}
+
+\subsubsection{Responsabilități}
+
+\begin{itemize}
+    \item Implementarea operațiunilor SOAP (C binding-uri)
+    \item Mapare cereri HTTP SOAP $\rightarrow$ C structs
+    \item Invocarea logicii de procesare
+    \item Construire răspunsuri SOAP
+    \item Gestiunea erorilor
+\end{itemize}
+
+\subsubsection{Operații SOAP Expuse}
+
+\begin{enumerate}
+    \item \textbf{AnalyzeAudio}: Calculează spectrograma Mel pentru un fișier audio
+    \item \textbf{GetJobStatus}: (Milestone viitor) Query status job async
+    \item \textbf{ExtractFrame}: (Milestone viitor) Extrage frame din video
+\end{enumerate}
+
+\subsection{Modulul Processing (processing.c / processing.h)}
+
+\subsubsection{Fișiere Componente}
+\begin{itemize}
+    \item \texttt{src/processing.c} --- Implementare DSP
+    \item \texttt{include/processing.h} --- Interfață publică
+\end{itemize}
+
+\subsubsection{Responsabilități}
+
+\begin{itemize}
+    \item Inițializare LibrosaC (dacă necesar)
+    \item Citire fișier audio din FS
+    \item Aplicare resample (target\_sr)
+    \item Calculare STFT (FFT, window, overlap)
+    \item Conversie la Mel scale (n\_fft, hop\_length, n\_mels)
+    \item Normalizare și log-compresie
+    \item Scriere spectrogram binar în output/
+    \item Returnare metadate (sample rate, frames, durata)
+\end{itemize}
+
+\subsubsection{Tipuri de Date}
+
+\begin{lstlisting}
+/* Cerere de procesare */
+typedef struct {
+    char input_path[MAX_PATH_LEN];   /* Cale intrare audio/video */
+    char output_path[MAX_PATH_LEN];  /* Cale ieșire spectrogram */
+    int  target_sr;                  /* Target sample rate (Hz) */
+    int  n_fft;                      /* FFT size */
+    int  hop_length;                 /* Hop length (frames) */
+    int  n_mels;                     /* Meluri benzi */
+} proc_request_t;
+
+/* Rezultat procesare */
+typedef struct {
+    int    status;                       /* 0=OK, -1=error */
+    char   error_msg[256];               /* Mesaj eroare */
+    char   output_path[MAX_PATH_LEN];    /* Cale output */
+    int    sample_rate;                  /* Sample rate actual */
+    int    n_samples;                    /* Număr samples */
+    double duration_s;                   /* Durata (secunde) */
+    int    n_mels;                       /* Mel benzi output */
+    int    n_frames;                     /* Cadre timp output */
+} proc_result_t;
+
+int process_spectrogram(const proc_request_t*req, 
+                        proc_result_t*res);
+\end{lstlisting}
+
+\textbf{Valori Implicite:}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|r|}
+        \toprule
+        \textbf{Parametru} & \textbf{Valoare Implicită} \\
+        \midrule
+        Sample Rate & 22050 Hz \\
+        N FFT & 2048 \\
+        Hop Length & 512 \\
+        N Mels & 128 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Modulul Config Loader (config\_loader.c / .h)}
+
+\subsubsection{Responsabilități}
+
+\begin{itemize}
+    \item Parse fișier \texttt{.cfg} (format libconfig)
+    \item Extract parametri server (port, max\_workers, log\_level, etc.)
+    \item Validare valori (port în range 1024-65535, etc.)
+    \item Alocare memorie pentru strings (output\_dir, endpoint)
+    \item Cleanup resurse (config\_free)
+\end{itemize}
+
+\subsubsection{Interfață Publică}
+
+\begin{lstlisting}
+int  config_load(const char*path, server_config_t*out);
+void config_free(server_config_t*cfg);
+\end{lstlisting}
+
+\subsubsection{Format Fișier Config}
+
+\begin{lstlisting}
+# PCD T31 - Server Configuration File
+# Format: libconfig
+
+server:
+{
+    port = 8080;
+    max_workers = 4;
+    output_dir = "./output";
+    soap_endpoint = "http://localhost:8080/soap";
+    log_level = 1;
+};
+
+processing:
+{
+    default_sample_rate = 22050;
+    default_n_fft       = 2048;
+    default_hop_length  = 512;
+    default_n_mels      = 128;
+};
+\end{lstlisting}
+
+\subsection{Modulul Client (inetclient)}
+
+\subsubsection{Fișiere Componente}
+\begin{itemize}
+    \item \texttt{src/client.c} --- Logica client SOAP
+\end{itemize}
+
+\subsubsection{Responsabilități}
+
+\begin{itemize}
+    \item Parse argumente CLI (-s server, -f file, -m mels, -r sr, -h help)
+    \item Citire variabilă mediu \texttt{PCD\_SERVER} (overrides default)
+    \item Construire cerere SOAP AnalyzeAudio
+    \item Apel soap\_call\_ns\_\_AnalyzeAudio()
+    \item Afișare rezultate (status, output path, metadate)
+    \item Cleanup SOAP context
+\end{itemize}
+
+\subsubsection{Utilizare}
+
+\begin{lstlisting}
+# Apel cu argumente
+./inetclient -s http://localhost:8080/soap \
+             -f audio.wav -m 128 -r 22050
+
+# Cu variabilă mediu
+PCD_SERVER=http://server2.com:9090/soap \
+  ./inetclient -f audio.wav
+\end{lstlisting}
+
+\subsection{Module Demo (demo\_milestone1, inetds2, inetsample2)}
+
+Aplicații de demonstrație și test pentru validare a componentelor.
+
+% =============================================================================
+\section{Interfețe și Protocoale}
+% =============================================================================
+
+\subsection{Protocolul SOAP}
+
+\subsubsection{Generare și Compilare}
+
+Fișierul \texttt{src/proto.h} conține definițiile interface-ului SOAP:
+
+\begin{lstlisting}
+/**
+ * gSOAP namespace map
+ * Serviciu: ServiciulVideoSpectrograma
+ * Endpoint: http://localhost:8080/soap
+ * Schema namespace: urn:ServiciulVideoSpectrograma
+ */
+
+//gSOAP ns serviciu nume: ServiciulVideoSpectrograma
+//gSOAP ns serviciu style: document
+//gSOAP ns serviciu encoding: literal
+//gSOAP ns serviciu location: http://localhost:8080/soap
+//gSOAP ns schema namespace: urn:ServiciulVideoSpectrograma
+\end{lstlisting}
+
+Generare cod:
+\begin{lstlisting}
+soapcpp2 -c -S -Iinclude -Isrc src/proto.h -d src/
+\end{lstlisting}
+
+Aceasta produce:
+\begin{itemize}
+    \item \texttt{src/soapC.c} --- Marshaling/unmarshaling funcții
+    \item \texttt{src/soapServer.c} --- Server dispatch
+    \item \texttt{src/soapClient.c} --- Client proxy (nu se folosește direct, doar linkare)
+    \item \texttt{src/soapH.h} --- Header generat cu types
+    \item \texttt{src/soap*.h} --- Helper headers
+\end{itemize}
+
+\subsubsection{Operația AnalyzeAudio}
+
+\textbf{Cerere HTTP SOAP:}
+
+\begin{lstlisting}
+POST /soap HTTP/1.1
+Host: localhost:8080
+Content-Type: text/xml; charset=utf-8
+Content-Length: XXX
+SOAPAction: ""
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="..." 
+                   xmlns:ns="urn:ServiciulVideoSpectrograma">
+  <SOAP-ENV:Body>
+    <ns:AnalyzeAudio>
+      <inputFilePath>/path/to/audio.wav</inputFilePath>
+      <targetSampleRate>22050</targetSampleRate>
+      <nMels>128</nMels>
+      <nFft>2048</nFft>
+      <hopLength>512</hopLength>
+    </ns:AnalyzeAudio>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+\end{lstlisting}
+
+\textbf{Răspuns HTTP SOAP:}
+
+\begin{lstlisting}
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: YYY
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="..." 
+                   xmlns:ns="urn:ServiciulVideoSpectrograma">
+  <SOAP-ENV:Body>
+    <ns:AnalyzeAudioResponse>
+      <statusCode>0</statusCode>
+      <statusMessage>OK</statusMessage>
+      <resultFilePath>./output/spec_12345.bin</resultFilePath>
+      <sampleRate>22050</sampleRate>
+      <durationSeconds>45.5</durationSeconds>
+      <nMels>128</nMels>
+      <nFrames>1234</nFrames>
+    </ns:AnalyzeAudioResponse>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+\end{lstlisting}
+
+\subsection{Configurația Libconfig}
+
+Format fișier: grup server cu sub-parametri.
+
+\begin{itemize}
+    \item \textbf{port}: Port TCP pentru SOAP (int, 1024-65535)
+    \item \textbf{max\_workers}: Max procese worker (int, $\geq 1$)
+    \item \textbf{output\_dir}: Directory ieșire spectrogram (string)
+    \item \textbf{soap\_endpoint}: URL endpoint (string, informativ)
+    \item \textbf{log\_level}: 0=silent, 1=info, 2=debug
+\end{itemize}
+
+\subsection{Interfața File I/O}
+
+\textbf{Intrări:}
+\begin{itemize}
+    \item Fișiere audio: WAV, MP3, FLAC, OGG (suportate de LibrosaC)
+    \item Fișiere video: MP4, AVI, MKV (audio extract)
+\end{itemize}
+
+\textbf{Ieșiri:}
+\begin{itemize}
+    \item Fișiere spectrogram: Format binar (definit de LibrosaC)
+    \item Locație: \texttt{./output/} (configurable)
+    \item Nomenclare: \texttt{spec\_<timestamp>.bin} sau similară
+\end{itemize}
+
+% =============================================================================
+\section{Fluxuri de Date și Control}
+% =============================================================================
+
+\subsection{Fluxul Request/Response}
+
+\begin{verbatim}
+┌─────────────────┐
+│   Client Ready  │
+└────────┬────────┘
+         │
+         │ soap_call_ns__AnalyzeAudio(&req, &res)
+         │
+         ▼
+┌─────────────────────────┐
+│  Trimite SOAP Request   │
+│   HTTP POST             │
+└────────┬────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  Server Receives         │
+│  HTTP POST               │
+└────────┬─────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  gSOAP Parse SOAP Body   │
+│  Unmarshal to C struct   │
+└────────┬─────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  Call Handler Function   │
+│  (ns__AnalyzeAudio)      │
+└────────┬─────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  fork() Worker Process   │
+└────────┬─────────────────┘
+         │
+    ┌────┴─────────────────────────┐
+    │                              │
+    ▼ (Parent)                     ▼ (Child)
+┌──────────────┐          ┌──────────────────────┐
+│ waitpid()    │          │ process_spectrogram()│
+│              │          │ (LibrosaC)           │
+└──────────────┘          └──────┬───────────────┘
+                                 │
+                                 ▼
+                          ┌──────────────────┐
+                          │ Write output file│
+                          │ to ./output/     │
+                          └──────┬───────────┘
+                                 │
+                                 ▼
+                          ┌──────────────────┐
+                          │ exit(0)          │
+                          └──────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  Marshal Result to SOAP  │
+│  Build Response Envelope │
+└────────┬─────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  HTTP 200 OK             │
+│  Send SOAP Response      │
+└────────┬─────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  Client Receives         │
+│  Unmarshals Response     │
+└────────┬─────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  Client Displays Result  │
+└──────────────────────────┘
+\end{verbatim}
+
+\subsection{Fluxul Intern Processing}
+
+\begin{enumerate}
+    \item \textbf{Parsare cerere:} Extract input\_path, target\_sr, n\_mels, etc.
+    \item \textbf{Validare fișier:} Check dacă input\_path există, readable
+    \item \textbf{Inițializare LibrosaC:} Setare rate, FFT size, etc.
+    \item \textbf{Citire audio:} Load fișier, decode (WAV/MP3/etc)
+    \item \textbf{Resample:} Dacă target\_sr $\neq$ native rate
+    \item \textbf{STFT:} Aplicare window (Hann), FFT, compute magnitude
+    \item \textbf{Mel Filter Bank:} Mapare frecvență $\rightarrow$ Mel scale
+    \item \textbf{Log Compression:} Log10(1 + mel\_spec)
+    \item \textbf{Scriere output:} Binar format (float32 matrix)
+    \item \textbf{Calcul metadate:} n\_samples, duration, n\_frames
+    \item \textbf{Return result:} Status=0, metadate populate
+\end{enumerate}
+
+\subsection{State Diagram --- Server Main Process}
+
+\begin{verbatim}
+┌──────────┐
+│  START   │
+└────┬─────┘
+     │
+     ▼
+┌────────────────────┐
+│ Parse CLI args     │
+│ Load config file   │
+├────────────────────┤
+│  config_load()     │
+└────┬───────────────┘
+     │
+     ▼
+┌────────────────────┐
+│ Setup signal       │
+│ handlers (SIGTERM) │
+└────┬───────────────┘
+     │
+     ▼
+┌────────────────────────────┐
+│ gSOAP Init                 │
+│ Listen on TCP port         │
+└────┬───────────────────────┘
+     │
+     ▼
+┌────────────────────────────┐
+│  g_running == 1 ?          │
+├────────────────────────────┤
+│ /          \               │
+│ NO         YES (continue)  │
+│ │          │               │
+└─┼──────────┼───────────────┘
+  │          │
+  │          ▼
+  │     ┌──────────────┐
+  │     │ soap_serve() │
+  │     │ (blocking)   │
+  │     │ Accept conn  │
+  │     │ Handle SOAP  │
+  │     └──────┬───────┘
+  │            │
+  │            ▼
+  │     ┌──────────────────────┐
+  │     │ fork() worker        │
+  │     │ or direct handle     │
+  │     └──────┬───────────────┘
+  │            │
+  │            ▼
+  │     ┌──────────────────────┐
+  │     │ Process request      │
+  │     │ (worker or thread)   │
+  │     └──────┬───────────────┘
+  │            │
+  │            ▼
+  │     ┌──────────────────────┐
+  │     │ Loop back            │
+  │     │ (next conn or SIGTERM)
+  │     └──────┬───────────────┘
+  │            │
+  │            └──────► Loop to g_running check
+  │
+  ▼
+┌────────────────────────┐
+│ Cleanup resources      │
+│ soap_destroy()         │
+│ config_free()          │
+└────┬───────────────────┘
+     │
+     ▼
+┌────────────────────────┐
+│  EXIT (0)              │
+└────────────────────────┘
+\end{verbatim}
+
+% =============================================================================
+\section{Considerații Tehnologice și Dependență Build}
+% =============================================================================
+
+\subsection{Build System --- Makefile}
+
+\begin{lstlisting}
+CC      = gcc
+CFLAGS  = -Wall -Wextra -Wpedantic -Wformat=2 -Wshadow \
+          -Wstrict-prototypes -Wmissing-prototypes       \
+          -Wno-unused-parameter                          \
+          -std=c11 -D_POSIX_C_SOURCE=200809L             \
+          -Iinclude -Isrc
+
+LIBS_SOAP    = -lgsoap
+LIBS_CONFIG  = -lconfig
+LIBS_LIBROSA = -lrosacpp
+LIBS_THREAD  = -lpthread
+LIBS_MATH    = -lm
+\end{lstlisting}
+
+\textbf{Ținte build:}
+
+\begin{itemize}
+    \item \texttt{make all}: Compilare toate executabile
+    \item \texttt{make serverds}: Compilare SOAP server
+    \item \texttt{make inetclient}: Compilare SOAP client
+    \item \texttt{make demo\_milestone1}: Compilare demo app
+    \item \texttt{make soap\_gen}: Regenerare cod SOAP din proto.h
+    \item \texttt{make tidy}: Run clang-tidy (static analysis)
+    \item \texttt{make clean}: Ștergere binare și fișiere generate
+\end{lstlisting}
+
+\subsection{Dependențe Externe --- Package Management}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \toprule
+        \textbf{Bibliotecă} & \textbf{Versiune} & \textbf{Scop} \\
+        \midrule
+        gsoap & 2.8+ & Generare SOAP C code \\
+        libconfig & 1.7+ & Parse \texttt{.cfg} files \\
+        librosacpp & 0.9+ & DSP (Mel spectrograma) \\
+        libpthread & POSIX & Threading (viitor) \\
+        libm & Standard & Math functions \\
+        libc (glibc) & 2.31+ & POSIX syscalls \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Flag-uri Compiler și Opțiuni}
+
+\textbf{Optimizare și Debugging:}
+
+\begin{lstlisting}
+# Release build
+make DEBUG=0    # -O2 -DNDEBUG
+
+# Debug build
+make DEBUG=1    # -g -O0 -DDEBUG
+\end{lstlisting}
+
+\textbf{Flags de Avertisment:}
+
+\begin{itemize}
+    \item \texttt{-Wall -Wextra -Wpedantic}: Toate avertismentele standard
+    \item \texttt{-Wformat=2}: Verificare printf/scanf format strings
+    \item \texttt{-Wshadow}: Variabile shadowing
+    \item \texttt{-Wstrict-prototypes}: Functii fără prototype
+\end{itemize}
+
+\textbf{Standard C:}
+
+\begin{itemize}
+    \item \texttt{-std=c11}: C11 standard (variadic macros, generics, etc.)
+    \item \texttt{-D\_POSIX\_C\_SOURCE=200809L}: POSIX 2008 symbols
+\end{itemize}
+
+\subsection{Generare SOAP Bindings}
+
+\begin{lstlisting}
+# Generate C stubs from proto.h
+soapcpp2 -c -S -Iinclude -Isrc src/proto.h -d src/
+
+# Opțiuni:
+# -c       : Generate C code (not C++)
+# -S       : Generate server code (dispatch)
+# -Iinclude : Include path untuk gSOAP headers
+# -d src/  : Output directory
+\end{lstlisting}
+
+\textbf{Fișiere generate:}
+
+\begin{itemize}
+    \item \texttt{src/soapC.c}: Core marshaling funcții
+    \item \texttt{src/soapServer.c}: Service implementation skeletons
+    \item \texttt{src/soapClient.c}: Client proxy (pentru reference)
+    \item \texttt{src/soapH.h}: Typedef-uri și prototypes
+    \item \texttt{src/soapStub.h}: Struct definitions
+\end{itemize}
+
+\subsection{Analiza Statică cu clang-tidy}
+
+\begin{lstlisting}
+make tidy    # Run clang-tidy sur file-urile critice
+\end{lstlisting}
+
+Verifică:
+\begin{itemize}
+    \item Memory leaks (valgrind integration)
+    \item Use-after-free
+    \item Buffer overflows
+    \item Dead code
+    \item Style violations
+\end{itemize}
+
+% =============================================================================
+\section{Managementul Erorilor și Logging}
+% =============================================================================
+
+\subsection{Niveluri de Logging}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|l|l|}
+        \toprule
+        \textbf{Level} & \textbf{Nume} & \textbf{Descriere} \\
+        \midrule
+        0 & SILENT & Nici un output \\
+        1 & INFO & Mesaje informative (default) \\
+        2 & DEBUG & Mesaje verbose pentru debugging \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Configurare:}
+
+\begin{lstlisting}
+# În server.cfg
+server:
+{
+    log_level = 1;  # 0=silent, 1=info, 2=debug
+};
+\end{lstlisting}
+
+\subsection{Coduri Eroare}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|l|}
+        \toprule
+        \textbf{Cod} & \textbf{Semnificație} \\
+        \midrule
+        0 & Succes \\
+        -1 & Eroare generică (vezi error\_msg) \\
+        -2 & Fișier nu găsit \\
+        -3 & Permisiuni insuficiente \\
+        -4 & Out of memory \\
+        -5 & Invalid parametru \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Strategie Cleanup}
+
+\textbf{Resurse în SOAP request/response:}
+
+\begin{itemize}
+    \item \texttt{soap\_end()} --- Cleanup după fiecare cerere
+    \item \texttt{soap\_destroy()} --- Cleanup la shutdown
+    \item Pointeri alare: \texttt{soap\_malloc()}, \texttt{soap\_strdup()}
+\end{itemize}
+
+\textbf{Resurse în processing:}
+
+\begin{itemize}
+    \item Fișiere: \texttt{open()}, \texttt{read()}, \texttt{close()}
+    \item Bufere: Alocare cu \texttt{malloc()}, free cu \texttt{free()}
+\end{itemize}
+
+% =============================================================================
+\section{Seguritate și Robustețe}
+% =============================================================================
+
+\subsection{Input Validation}
+
+\begin{itemize}
+    \item \textbf{Path traversal:} Validează paths (nu permite \texttt{../} escape)
+    \item \textbf{Buffer overflow:} Folosire \texttt{strncpy()}, size limits
+    \item \textbf{Integer overflow:} Verificare ranges pentru n\_fft, n\_mels, etc.
+    \item \textbf{SOAP injection:} gSOAP sanitizează XML automatically
+\end{itemize}
+
+\subsection{Process Isolation via fork()}
+
+\begin{itemize}
+    \item Fiecare worker ruleaza în spațiu de memorie separat
+    \item Crash worker $\neq$ crash server
+    \item Resurse cleanup automatice pe exit process
+    \item Semnale (SIGSEGV, SIGABRT) nu afectează parent
+\end{itemize}
+
+\subsection{Signal Handling}
+
+\begin{itemize}
+    \item \textbf{SIGTERM}: Graceful shutdown, cleanup
+    \item \textbf{SIGCHLD}: (Opțional) Reap zombie workers
+    \item \textbf{SIGPIPE}: Ignore (previne crash pe broken socket)
+    \item Signal handlers sunt async-signal-safe (doar \texttt{write()}, etc.)
+\end{itemize}
+
+\subsection{Limitări Resurse}
+
+\begin{itemize}
+    \item \textbf{max\_workers:} Limit concurrent processes
+    \item \textbf{SOAP\_TIMEOUT\_S:} Timeout 30s pe operație
+    \item \textbf{MAX\_KEEP\_ALIVE:} Limit reuse conexiuni
+    \item \textbf{MAX\_PATH\_LEN:} 512 bytes limit paths
+\end{itemize}
+
+% =============================================================================
+\section{Testare și Validare}
+% =============================================================================
+
+\subsection{Strategia de Testare}
+
+\begin{enumerate}
+    \item \textbf{Unit Tests}: Test componente individual (processing, config\_loader)
+    \item \textbf{Integration Tests}: Test SOAP client-server interaction
+    \item \textbf{Load Tests}: Test concurrent workers, stress testing
+    \item \textbf{Security Tests}: Path traversal, buffer overflow, fuzzing
+    \item \textbf{Static Analysis}: clang-tidy, code review
+\end{enumerate}
+
+\subsection{Scripturi Test}
+
+\begin{itemize}
+    \item \texttt{test\_milestone1.sh}: Executa scenarii test
+    \item \texttt{run\_demo.sh}: Run demo application
+    \item \texttt{setup.sh}, \texttt{setup\_complet.sh}: Environment setup
+\end{itemize}
+
+\subsection{Cazuri de Test Relevante}
+
+\begin{enumerate}
+    \item \textbf{Happy Path}: Client-server request/response normal
+    \item \textbf{Missing File}: Input file nu există
+    \item \textbf{Invalid Params}: Parameters invalid (n\_mels=0, sr=0, etc.)
+    \item \textbf{Concurrent Requests}: Multiple clients simultaneous
+    \item \textbf{Server Shutdown}: SIGTERM graceful shutdown
+    \item \textbf{Worker Crash}: Verify server survives worker crash
+    \item \textbf{Disk Full}: Output directory full, error handling
+\end{enumerate}
+
+% =============================================================================
+\section{Performance și Scalabilitate}
+% =============================================================================
+
+\subsection{Metrici de Performance}
+
+\begin{itemize}
+    \item \textbf{Latență request:} Timp de la client POST până la response primire
+    \item \textbf{Throughput:} Cereri/sec procesate concurrent
+    \item \textbf{CPU Usage}: Per worker, total server
+    \item \textbf{Memory Usage}: Peak RSS per worker
+    \item \textbf{I/O Efficiency}: Disk read/write speeds
+\end{itemize}
+
+\subsection{Bottleneck-uri Identificate}
+
+\begin{enumerate}
+    \item \textbf{LibrosaC DSP}: Calculul STFT și Mel filtri sunt CPU-intensive
+    \item \textbf{Disk I/O}: Write output spectrogram la disk
+    \item \textbf{Network Latency}: SOAP over HTTP
+    \item \textbf{Process forking}: Overhead syscall fork()
+\end{enumerate}
+
+\subsection{Optimizări Posibile (Viitor)}
+
+\begin{itemize}
+    \item \textbf{Thread Pool}: Înlocuire fork() cu thread pool (pthreads)
+    \item \textbf{Async I/O}: Folosire aio\_*, epoll() pentru I/O async
+    \item \textbf{Caching}: Cache spectrograme deja calculate
+    \item \textbf{Compression}: Comprese output spectrogram (gzip)
+    \item \textbf{REST API}: REST + JSON alternativ la SOAP (lightweight)
+\end{itemize}
+
+% =============================================================================
+\section{Desfășurare și Operaționale}
+% =============================================================================
+
+\subsection{Cerinți Sistem}
+
+\begin{itemize}
+    \item \textbf{OS}: Linux (Kernel 3.10+), macOS 10.12+
+    \item \textbf{Compiler}: GCC 5.0+, Clang 6.0+
+    \item \textbf{RAM}: Min 512MB, recomandat 2GB+
+    \item \textbf{Disk}: Min 100MB (pentru build + output)
+    \item \textbf{Network}: TCP/IP stack (pentru SOAP)
+\end{itemize}
+
+\subsection{Instalare Dependencies}
+
+\subsubsection{Debian/Ubuntu}
+\begin{lstlisting}
+sudo apt-get install gcc make git
+sudo apt-get install gsoap libconfig-dev
+sudo apt-get install libpthread-stubs0-dev libm librosacpp-dev
+\end{lstlisting}
+
+\subsubsection{RedHat/CentOS}
+\begin{lstlisting}
+sudo yum install gcc make git
+sudo yum install gsoap libconfig-devel
+sudo yum install pthread-devel libm librosacpp-devel
+\end{lstlisting}
+
+\subsection{Build și Desfășurare}
+
+\begin{lstlisting}
+# 1. Clone sau cd workspace
+cd pcd-t31
+
+# 2. Generate SOAP bindings
+make soap_gen
+
+# 3. Build all
+make all
+
+# 4. Verify executabile
+ls -la serverds inetclient demo_milestone1
+
+# 5. Start server
+./serverds -c config/server.cfg -p 8080
+
+# 6. (În alt terminal) Run client
+./inetclient -f audio.wav -m 128
+
+# 7. Check output
+ls -la output/
+\end{lstlisting}
+
+\subsection{Monitoring și Diagnostică}
+
+\begin{itemize}
+    \item \textbf{ps aux}: Verifică running processes (serverds, workers)
+    \item \textbf{netstat -tuln}: Verifică port 8080 listening
+    \item \textbf{top}: Monitor CPU/memory per process
+    \item \textbf{strace}: Trace syscalls (debugging)
+    \item \textbf{valgrind}: Memory profiling, leak detection
+\end{itemize}
+
+\subsection{Graceful Shutdown}
+
+\begin{lstlisting}
+# Trimite SIGTERM la serverds
+kill -TERM <PID>
+
+# Server va:
+# 1. Set g_running = 0
+# 2. Close accept() loop
+# 3. Wait for active workers (waitpid)
+# 4. Cleanup resources
+# 5. Exit cleanly
+\end{lstlisting}
+
+% =============================================================================
+\section{Referințe și Resurse}
+% =============================================================================
+
+\begin{itemize}
+    \item \textbf{gSOAP}: \url{https://www.genivia.com/products.html}
+    \item \textbf{libconfig}: \url{https://hyperrealm.github.io/libconfig/}
+    \item \textbf{LibrosaC}: Audio DSP library (C binding)
+    \item \textbf{POSIX Standard}: \url{https://pubs.opengroup.org/onlinepubs/}
+    \item \textbf{IEEE 1016-2009}: Software Design Document standard
+    \item \textbf{HTTP/1.1 RFC}: \url{https://tools.ietf.org/html/rfc7230}
+    \item \textbf{SOAP 1.2 W3C}: \url{https://www.w3.org/TR/soap12/}
+\end{itemize}
+
+% =============================================================================
+\section{Concluzie}
+% =============================================================================
+
+PCD T31 este o aplicație de procesare distribuită bine structurată, implementând:
+
+\begin{itemize}
+    \item Serviciu web SOAP standard pentru analiza audio
+    \item Arhitectură forking-based pentru paralelism și robustețe
+    \item Configurație flexibilă via libconfig
+    \item Componente modulare cu responsabilități clare
+    \item Security și error handling corespunzători
+    \item Build system simplu și reproducibil
+\end{itemize}
+
+\textbf{Puncte forte:}
+\begin{itemize}
+    \item Izolare proceselor via fork()
+    \item SOAP standard, generare automată cod gSOAP
+    \item Logging și error handling robusti
+    \item Suport multi-format audio/video (LibrosaC)
+\end{itemize}
+
+\textbf{Arii de îmbunătățire:}
+\begin{itemize}
+    \item Migrare la thread pool (eficiență memorie)
+    \item Async I/O pentru scalabilitate mai bună
+    \item REST API alternativ (lightweight clients)
+    \item Caching spectrograme calculate anterior
+\end{itemize}
+
+Aplicația este gata pentru deployment în mediu de producție cu monitoring și scaling corespunzător.
+
+\appendix
+
+% =============================================================================
+\section{Diagrama Dependințelor Modului}
+% =============================================================================
+
+\begin{verbatim}
+┌──────────────────────────────────────────────────────────────────┐
+│                     EXECUTABILE                                 │
+├──────────────────────────────────────────────────────────────────┤
+│ serverds          inetclient         demo_milestone1             │
+│ (SOAP Server)     (SOAP Client)      (Demo App)                  │
+└──────┬──────────────┬────────────────────┬──────────────────────┘
+       │              │                    │
+       └──────────────┼────────────────────┘
+                      │
+        ┌─────────────▼───────────────┐
+        │   MODULES IMPLEMENTATE      │
+        ├─────────────────────────────┤
+        │ - server.c                  │
+        │ - soapds.c (SOAP handlers)  │
+        │ - processing.c              │
+        │ - config_loader.c           │
+        │ - client.c                  │
+        └─────────────┬───────────────┘
+                      │
+        ┌─────────────▼───────────────┐
+        │  GENERATED BY gSOAP         │
+        ├─────────────────────────────┤
+        │ - soapC.c                   │
+        │ - soapServer.c              │
+        │ - soapH.h                   │
+        │ - proto.nsmap               │
+        └─────────────┬───────────────┘
+                      │
+        ┌─────────────▼───────────────┐
+        │  EXTERNAL LIBRARIES         │
+        ├─────────────────────────────┤
+        │ - gsoap                     │
+        │ - libconfig                 │
+        │ - librosacpp (LibrosaC)     │
+        │ - libpthread                │
+        │ - libm (math)               │
+        │ - libc (POSIX)              │
+        └─────────────────────────────┘
+\end{verbatim}
+
+% =============================================================================
+\section{Header Files Structure}
+% =============================================================================
+
+\begin{lstlisting}
+// include/server.h
+#ifndef SERVER_H
+#define SERVER_H
+typedef struct { ... } server_config_t;
+#define MAX_PATH_LEN 512
+#define DEFAULT_PORT 8080
+// ... constante
+#endif
+
+// include/processing.h
+#ifndef PROCESSING_H
+#define PROCESSING_H
+typedef struct { ... } proc_request_t;
+typedef struct { ... } proc_result_t;
+int process_spectrogram(...);
+#endif
+
+// include/config_loader.h
+#ifndef CONFIG_LOADER_H
+#define CONFIG_LOADER_H
+int  config_load(const char*path, server_config_t*out);
+void config_free(server_config_t*cfg);
+#endif
+
+// src/proto.h
+// gSOAP interface definition
+//gSOAP ns serviciu
+struct ns__AnalyzeAudioRequest { ... };
+struct ns__AnalyzeAudioResponse { ... };
+struct ns__JobStatusRequest { ... };
+// ... mai multe structs
+\end{lstlisting}
+
+% =============================================================================
+\section{Revision History}
+% =============================================================================
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|l|}
+        \toprule
+        \textbf{Versiune} & \textbf{Data} & \textbf{Modificări} \\
+        \midrule
+        1.0 & 2026-04-21 & Versiune inițială completă --- SDD \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\end{document}

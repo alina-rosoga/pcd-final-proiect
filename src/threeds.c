@@ -21,15 +21,16 @@
 /* pentru manipularea sirurilor de caractere */
 #include <pthread.h>
 /* pentru fir-uri POSIX */
-#include <unistd.h>
-/* pentru functii POSIX de sistem */
 
 #include "soapH.h"
 /* pentru anteturile generate de gSOAP */
 #include "proto.nsmap"
 /* pentru maparea namespace-urilor in gSOAP */
-#include "server.h"
-/* pentru definitii ale serverului */
+
+#define LOG_BUFSIZE 512
+
+#define SAFE_MEMSET(dst, val, sz) (void)memset((dst), (val), (sz))
+#define SAFE_MEMCPY(dst, src, sz) (void)memcpy((dst), (src), (sz))
 
 /* fir pool worker argument                                         */
 typedef struct {
@@ -44,7 +45,7 @@ static void*thread_worker(void*arg)
     free(targ);
 
     /* Detach so no join needed - resources released on iesire */
-    pthread_detach(pthread_self());
+    (void)pthread_detach(pthread_self());
 
     soap_serve(soap);
     soap_destroy(soap);
@@ -68,7 +69,7 @@ int run_threaded_soap_server(struct soap*master_soap, int max_threads)
 {
     (void)max_threads;  /* TODO: implement semaphore-based throttle */
 
-    fprintf(stdout, "[threeds] Thread-per-request SOAP server started\n");
+    (void)fprintf(stdout, "[threeds] Thread-per-request SOAP server started\n");
 
     for (;;) {
         /* Block until a client Conecteaza */
@@ -81,7 +82,7 @@ int run_threaded_soap_server(struct soap*master_soap, int max_threads)
         /* aloca a soap copy pentru implicitul new fir */
         struct soap*tsoap=soap_copy(master_soap);
         if (!tsoap) {
-            fprintf(stderr, "[threeds] soap_copy failed\n");
+            fputs("[threeds] soap_copy failed\n", stderr);
             soap_closesock(master_soap);
             continue;
         }

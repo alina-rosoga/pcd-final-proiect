@@ -41,6 +41,8 @@
 #include "processing.h"
 /* pentru functii de procesare audio */
 
+#define DIR_PERMISSIONS 0755
+
 /* print_env_info: demonstrate getenv utilizare                           */
 static void print_env_info(void)
 {
@@ -49,11 +51,11 @@ static void print_env_info(void)
     const char*pcd_env=getenv("PCD_SERVER");
     const char*path_env=getenv("PATH");
 
-    fprintf(stdout, "\n--- Environment Variables ---\n");
-    fprintf(stdout, "  HOME       = %s\n", home     ? home     : "(not set)");
-    fprintf(stdout, "  USER       = %s\n", user     ? user     : "(not set)");
-    fprintf(stdout, "  PCD_SERVER = %s\n", pcd_env  ? pcd_env  : "(not set)");
-    fprintf(stdout, "  PATH       = %.60s...\n", path_env ? path_env : "(not set)");
+    (void)fprintf(stdout, "\n--- Environment Variables ---\n");
+    (void)fprintf(stdout, "  HOME       = %s\n", home     ? home     : "(not set)");
+    (void)fprintf(stdout, "  USER       = %s\n", user     ? user     : "(not set)");
+    (void)fprintf(stdout, "  PCD_SERVER = %s\n", pcd_env  ? pcd_env  : "(not set)");
+    (void)fprintf(stdout, "  PATH       = %.60s...\n", path_env ? path_env : "(not set)");
 }
 
 /* librosa_demo_worker: runs inside fork()ed copil                    */
@@ -62,24 +64,24 @@ static void librosa_demo_worker(const char*audio_path,
                                 int         pipefd_write)
 {
     proc_result_t res;
-    memset(&res, 0, sizeof(res));
+    (void)memset(&res, 0, sizeof(res));
 
-    fprintf(stdout, "[child %d] Loading audio: %s\n", (int)getpid(), audio_path);
+    (void)fprintf(stdout, "[child %d] Loading audio: %s\n", (int)getpid(), audio_path);
 
     /* LibrosaC: incarca audio */
     float*samples=NULL;
     int    n_samples=0;
     int    sr=0;
 
-    int rc=librosa_load(audio_path, 22050, 1, &samples, &n_samples, &sr);
-    if (rc!=0 || !samples) {
-        snprintf(res.error_msg, sizeof(res.error_msg),
-                 "librosa_load failed (rc=%d)", rc);
+    int ret_code=librosa_load(audio_path, 22050, 1, &samples, &n_samples, &sr);
+    if (ret_code!=0 || !samples) {
+        (void)snprintf(res.error_msg, sizeof(res.error_msg),
+                 "librosa_load failed (rc=%d)", ret_code);
         res.status=-1;
         goto send_result;
     }
 
-    fprintf(stdout, "[child %d] Loaded %d samples @ %d Hz (%.2f s)\n",
+    (void)fprintf(stdout, "[child %d] Loaded %d samples @ %d Hz (%.2f s)\n",
             (int)getpid(), n_samples, sr, (double)n_samples/sr);
 
     /* LibrosaC: Mel spectrograma */
@@ -87,29 +89,29 @@ static void librosa_demo_worker(const char*audio_path,
     int    n_mels=0;
     int    n_frames=0;
 
-    rc=librosa_melspectrogram(samples, n_samples, sr,
+    ret_code=librosa_melspectrogram(samples, n_samples, sr,
                                 2048, 512, 128,
                                 &mel_spec, &n_mels, &n_frames);
     librosa_free(samples);
 
-    if (rc!=0 || !mel_spec) {
-        snprintf(res.error_msg, sizeof(res.error_msg),
-                 "librosa_melspectrogram failed (rc=%d)", rc);
+    if (ret_code!=0 || !mel_spec) {
+        (void)snprintf(res.error_msg, sizeof(res.error_msg),
+                 "librosa_melspectrogram failed (rc=%d)", ret_code);
         res.status=-1;
         goto send_result;
     }
 
-    fprintf(stdout, "[child %d] Mel spectrogram: %d bands x %d frames\n",
+    (void)fprintf(stdout, "[child %d] Mel spectrogram: %d bands x %d frames\n",
             (int)getpid(), n_mels, n_frames);
 
     /* LibrosaC: convert la dB */
     float*mel_db=NULL;
-    rc=librosa_amplitude_to_db(mel_spec, n_mels*n_frames, &mel_db);
+    ret_code=librosa_amplitude_to_db(mel_spec, n_mels*n_frames, &mel_db);
     librosa_free(mel_spec);
 
-    if (rc!=0 || !mel_db) {
-        snprintf(res.error_msg, sizeof(res.error_msg),
-                 "librosa_amplitude_to_db failed (rc=%d)", rc);
+    if (ret_code!=0 || !mel_db) {
+        (void)snprintf(res.error_msg, sizeof(res.error_msg),
+                 "librosa_amplitude_to_db failed (rc=%d)", ret_code);
         res.status=-1;
         goto send_result;
     }
@@ -119,8 +121,8 @@ static void librosa_demo_worker(const char*audio_path,
                   O_WRONLY | O_CREAT | O_TRUNC,
                   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
-        perror("[child] open output");
-        snprintf(res.error_msg, sizeof(res.error_msg),
+        (void)perror("[child] open output");
+        (void)snprintf(res.error_msg, sizeof(res.error_msg),
                  "open(%s) failed: %s", output_path, strerror(errno));
         librosa_free(mel_db);
         res.status=-1;
@@ -129,42 +131,42 @@ static void librosa_demo_worker(const char*audio_path,
 
     /* binar antet: [n_mels(int32), n_frames(int32)] */
     int32_t hdr[2]={ (int32_t)n_mels, (int32_t)n_frames };
-    write(fd, hdr, sizeof(hdr));
+    (void)write(fd, hdr, sizeof(hdr));
 
     /* scrie float data in chunks */
     size_t total=(size_t)(n_mels*n_frames)*sizeof(float);
     const char*ptr=(const char *)mel_db;
     while (total > 0) {
         ssize_t w=write(fd, ptr, total);
-        if (w < 0) { perror("[child] write"); break; }
+        if (w < 0) { (void)perror("[child] write"); break; }
         ptr   +=w;
         total -=(size_t)w;
     }
-    close(fd);
+    (void)close(fd);
     librosa_free(mel_db);
 
     res.status=0;
     res.n_mels=n_mels;
     res.n_frames=n_frames;
     res.sample_rate=sr;
-    strncpy(res.output_path, output_path, MAX_PATH_LEN - 1);
-    strncpy(res.error_msg,   "OK",        sizeof(res.error_msg) - 1);
+    (void)memcpy(res.output_path, output_path, MAX_PATH_LEN - 1);
+    res.output_path[MAX_PATH_LEN - 1]='\0';
+    (void)memcpy(res.error_msg, "OK", strlen("OK"));
+    res.error_msg[strlen("OK")]='\0';
 
-    fprintf(stdout, "[child %d] Written: %s\n", (int)getpid(), output_path);
+    (void)fprintf(stdout, "[child %d] Written: %s\n", (int)getpid(), output_path);
 
 send_result:
     /* trimite proc_result_t la parinte via pipe */
     {
         const char*p=(const char *)&res;
         size_t rem=sizeof(res);
-        while (rem > 0) {
+        while (rem > 0){ break; }
             ssize_t n=write(pipefd_write, p, rem);
             if (n < 0) break;
             p   +=n;
             rem -=(size_t)n;
-        }
-    }
-    close(pipefd_write);
+    (void)close(pipefd_write);
 }
 
 /* principal()                                                              */
@@ -177,18 +179,18 @@ int main(int argc, char*argv[])
     int opt;
     while ((opt=getopt(argc, argv, "c:f:h"))!=-1) {
         switch (opt) {
-        case 'c': cfg_path=optarg; break;
-        case 'f': audio_path=optarg; break;
-        case 'h':
-            fprintf(stdout,
-                "Usage: %s -c config.cfg -f audio.wav\n", argv[0]);
-            return 0;
-        default: return 1;
+        case 'c': {
+            cfg_path=optarg;
+            break;
         }
-    }
-
-    if (!audio_path) {
-        fprintf(stderr, "Error: -f <audio.wav> required\n");
+        case 'f': {
+            audio_path=optarg;
+            break;
+        }
+        case 'h': {
+            (void)fprintf(stdout,
+                "Usage: %s -c config.cfg -f audio.wav\n", argv[0]);
+        (void)fprintf(stderr, "Error: -f <audio.wav> required\n");
         return 1;
     }
 
@@ -196,58 +198,69 @@ int main(int argc, char*argv[])
     server_config_t cfg;
     config_load(cfg_path, &cfg);
 
-    fprintf(stdout, "=== PCD T31 - Milestone 1 Demo ===\n");
-    fprintf(stdout, "Config: port=%d  output_dir=%s  log_level=%d\n",
+    (void)fprintf(stdout, "PCD T31 - Milestone 1 Demo \n");
+    (void)fprintf(stdout, "Config: port=%d  output_dir=%s  log_level=%d\n",
             cfg.port, cfg.output_dir, cfg.log_level);
 
     /* Afiseaza mediu variabile */
     print_env_info();
 
     /* Create iesire director daca needed */
-    mkdir(cfg.output_dir, 0755);
+    (void)mkdir(cfg.output_dir, DIR_PERMISSIONS);
 
     /* construieste iesire cale */
     char output_path[MAX_PATH_LEN];
-    snprintf(output_path, sizeof(output_path),
+    (void)snprintf(output_path, sizeof(output_path),
              "%s/demo_%d.bin", cfg.output_dir, (int)getpid());
 
     /* Create pipe pentru IPC */
     int pipefd[2];
-    if (pipe(pipefd)!=0) { perror("pipe"); return 1; }
+    if (pipe(pipefd)!=0) { (void)perror("pipe"); return 1; }
 
     /* fork worker */
-    fprintf(stdout, "\n[parent %d] Forking worker...\n", (int)getpid());
+    (void)fprintf(stdout, "\n[parent %d] Forking worker...\n", (int)getpid());
     pid_t pid=fork();
 
     if (pid < 0) {
-        perror("fork");
+        (void)perror("fork");
         return 1;
     }
 
     if (pid==0) {
         /* copil */
-        close(pipefd[0]); /* inchide citeste end */
+        (void)close(pipefd[0]); /* inchide citeste end */
         librosa_demo_worker(audio_path, output_path, pipefd[1]);
         exit(EXIT_SUCCESS);
     }
 
     /* parinte: citeste rezultat from pipe */
-    close(pipefd[1]); /* inchide scrie end */
+    (void)close(pipefd[1]); /* inchide scrie end */
 
     proc_result_t res;
-    memset(&res, 0, sizeof(res));
+    (void)memset(&res, 0, sizeof(res));
     char*p=(char *)&res;
     size_t rem=sizeof(res);
     while (rem > 0) {
         ssize_t n=read(pipefd[0], p, rem);
-        if (n<=0) break;
-        p   +=n;
-        rem -=(size_t)n;
-    }
-    close(pipefd[0]);
+        if (n<=0) { break; }
+
+    /* parinte: citeste rezultat from pipe */
+    close(pipefd[1]); /* inchide scrie end */
+(void)close(pipefd[0]);
 
     /* asteapta pentru copil */
     int wstatus;
+    (void)waitpid(pid, &wstatus, 0);
+
+    /* afiseaza summary */
+    (void)fprintf(stdout, "\n--- Result (from child via pipe) ---\n");
+    (void)fprintf(stdout, "  Status      : %d (%s)\n", res.status, res.error_msg);
+    if (res.status==0) {
+        (void)fprintf(stdout, "  Output file : %s\n", res.output_path);
+        (void)fprintf(stdout, "  Sample rate : %d Hz\n", res.sample_rate);
+        (void)fprintf(stdout, "  Mel bands   : %d\n",    res.n_mels);
+        (void)fprintf(stdout, "  Time frames : %d\n",    res.n_frames);
+        (void)wstatus;
     waitpid(pid, &wstatus, 0);
 
     /* afiseaza summary */

@@ -17,7 +17,7 @@
 #include <stdio.h>  /* Standard I/O */
 #include <stdlib.h> /* Memory allocation and utilities */
 #include <string.h> /* String manipulation */
-#include <getopt.h>
+#include <unistd.h> /* getopt, optarg */
 
 /* gSOAP generated headers */
 #include "soapH.h"
@@ -26,6 +26,11 @@
 /* Default endpoint - can be overridden via PCD_SERVER env var */
 #define DEFAULT_ENDPOINT "http://localhost:8080/soap"
 #define ENV_SERVER_KEY   "PCD_SERVER"
+#define N_MELS_DEFAULT   128
+#define DEFAULT_SR       22050
+#define N_FFT_DEFAULT    2048
+#define HOP_LENGTH_DEFAULT 512
+#define STRTOL_BASE      10
 
 /* Print usage information */
 static void print_usage(const char*prog)
@@ -46,36 +51,56 @@ static void print_usage(const char*prog)
 int main(int argc, char*argv[])
 {
     /* Check for server override from environment */
-    const char*env_server=getenv(ENV_SERVER_KEY);
+    const char*env_server=getenv(ENV_SERVER_KEY); /* single-threaded, safe */
 
     const char*endpoint=env_server ? env_server : DEFAULT_ENDPOINT;
     const char*file_path=NULL;
-    int n_mels=128;
-    int sample_rate=22050;
+    int n_mels=N_MELS_DEFAULT;
+    int sample_rate=DEFAULT_SR;
 
     /* Parse command-line arguments */
     int opt;
-    while ((opt=getopt(argc, argv, "s:f:m:r:h"))!=-1) {
+    while ((opt=getopt(argc, argv, "s:f:m:r:h"))!=-1) { /* single-threaded, safe */
         switch (opt) {
-        case 's': endpoint=optarg;break;
-        case 'f': file_path=optarg;break;
-        case 'm': n_mels=atoi(optarg); break;
-        case 'r': sample_rate=atoi(optarg); break;
-        case 'h': print_usage(argv[0]); return 0;
-        default:  print_usage(argv[0]); return 1;
+        case 's': {
+            endpoint=optarg;
+            break;
+        }
+        case 'f': {
+            file_path=optarg;
+            break;
+        }
+        case 'm': {
+            char *endptr;
+            n_mels=(int)strtol(optarg, &endptr, STRTOL_BASE);
+            break;
+        }
+        case 'r': {
+            char *endptr;
+            sample_rate=(int)strtol(optarg, &endptr, STRTOL_BASE);
+            break;
+        }
+        case 'h': {
+            print_usage(argv[0]);
+            return 0;
+        }
+        default: {
+            print_usage(argv[0]);
+            return 1;
+        }
         }
     }
 
     if (!file_path) {
-        fprintf(stderr, "[client] Error: -f <file> is required\n\n");
+        (void)fprintf(stderr, "[client] Error: -f <file> is required\n\n");
         print_usage(argv[0]);
         return 1;
     }
 
-    fprintf(stdout, "[client] Connecting to: %s\n", endpoint);
-    fprintf(stdout, "[client] File         : %s\n", file_path);
-    fprintf(stdout, "[client] Mel bands    : %d\n", n_mels);
-    fprintf(stdout, "[client] Sample rate  : %d Hz\n", sample_rate);
+    (void)fprintf(stdout, "[client] Connecting to: %s\n", endpoint);
+    (void)fprintf(stdout, "[client] File         : %s\n", file_path);
+    (void)fprintf(stdout, "[client] Mel bands    : %d\n", n_mels);
+    (void)fprintf(stdout, "[client] Sample rate  : %d Hz\n", sample_rate);
 
     /* Initialize SOAP runtime */
     struct soap soap;
@@ -85,19 +110,19 @@ int main(int argc, char*argv[])
     struct ns__AnalyzeAudioRequest  req;
     struct ns__AnalyzeAudioResponse res;
 
-    memset(&req, 0, sizeof(req));
-    memset(&res, 0, sizeof(res));
+    (void)memset(&req, 0, sizeof(req));
+    (void)memset(&res, 0, sizeof(res));
 
     req.inputFilePath=(char *)file_path;
     req.targetSampleRate=sample_rate;
     req.nMels=n_mels;
-    req.nFft=2048;
-    req.hopLength=512;
+    req.nFft=N_FFT_DEFAULT;
+    req.hopLength=HOP_LENGTH_DEFAULT;
 
     /* Make SOAP call */
-    int rc=soap_call_ns__analyzeAudio(&soap, endpoint, NULL, &req, &res);
+    int ret_code=soap_call_ns__analyzeAudio(&soap, endpoint, NULL, &req, &res);
 
-    if (rc!=SOAP_OK) {
+    if (ret_code!=SOAP_OK) {
         soap_print_fault(&soap, stderr);
         soap_end(&soap);
         soap_done(&soap);
@@ -105,17 +130,17 @@ int main(int argc, char*argv[])
     }
 
     /* Display results */
-    fprintf(stdout, "\n[client] === Server Response ===\n");
-    fprintf(stdout, "[client] Status     : %d (%s)\n",
+    (void)fprintf(stdout, "\n[client] === Server Response ===\n");
+    (void)fprintf(stdout, "[client] Status     : %d (%s)\n",
             res.statusCode, res.statusMessage ? res.statusMessage : "");
 
     if (res.statusCode==0) {
-        fprintf(stdout, "[client] Result file: %s\n",
+        (void)fprintf(stdout, "[client] Result file: %s\n",
                 res.resultFilePath ? res.resultFilePath : "<none>");
-        fprintf(stdout, "[client] Sample rate: %d Hz\n",  res.sampleRate);
-        fprintf(stdout, "[client] Duration   : %.2f s\n", res.durationSeconds);
-        fprintf(stdout, "[client] Mel bands  : %d\n",     res.nMels);
-        fprintf(stdout, "[client] Time frames: %d\n",     res.nFrames);
+        (void)fprintf(stdout, "[client] Sample rate: %d Hz\n",  res.sampleRate);
+        (void)fprintf(stdout, "[client] Duration   : %.2f s\n", res.durationSeconds);
+        (void)fprintf(stdout, "[client] Mel bands  : %d\n",     res.nMels);
+        (void)fprintf(stdout, "[client] Time frames: %d\n",     res.nFrames);
     }
 
     /* Cleanup */
